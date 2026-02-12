@@ -1,34 +1,36 @@
 const SUPABASE_URL = "https://xhasvagsodoctsqbfwkw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
 
-// o SDK fica em window.supabase
+// cria o client SEM usar o nome "supabase"
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const btn = document.querySelector("#btn-prof");
 
-btn.addEventListener("click", async () => {
+btn.addEventListener("click", async (e) => {
+  e.preventDefault();
+
   const email = document.querySelector("#email").value.trim();
-  const senha = document.querySelector("#senha").value.trim();
+  const senha = document.querySelector("#senha").value;
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
-    password: senha,
+    password: senha
   });
 
   if (error) {
-    alert("Login inválido: " + error.message);
+    alert("Login inválido");
     return;
   }
 
   // busca perfil
-  const { data: profile, error: profileError } = await supabaseClient
+  const { data: profile, error: pError } = await supabaseClient
     .from("profiles")
     .select("role")
     .eq("id", data.user.id)
     .single();
 
-  if (profileError || !profile) {
-    alert("Perfil não encontrado.");
+  if (pError || !profile) {
+    alert("Perfil não encontrado");
     return;
   }
 
