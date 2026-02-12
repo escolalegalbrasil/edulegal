@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduLegal - Chat</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Bem-vindo ao EduLegal 🚀</h1>
+
+<div id="studentInfo"></div>
+
+<button onclick="logout()">Sair</button>
+
+<script>
+const student = JSON.parse(localStorage.getItem("edulegal_student"));
+
+if (!student) {
+  window.location.href = "index.html";
+}
+
+document.getElementById("studentInfo").innerHTML =
+  `<p>Olá, ${student.name} 👋</p>`;
+
+function logout() {
+  localStorage.removeItem("edulegal_student");
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
