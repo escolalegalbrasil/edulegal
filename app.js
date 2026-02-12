@@ -21,30 +21,35 @@ async function login() {
   if (!/^\d{4,8}$/.test(pin)) return showError("PIN inválido (use 4 a 8 números).");
 
   try {
-    // Busca aluno por username + pin + active=true
-    const url =
-      `${SUPABASE_URL}/rest/v1/students` +
-      `?select=id,name,username,active` +
-      `&username=eq.${encodeURIComponent(username)}` +
-      `&pin=eq.${encodeURIComponent(pin)}` +
-      `&active=eq.true` +
-      `&limit=1`;
+    // Monta URL com filtros (mais seguro do que concatenar string)
+    const endpoint = new URL(`${SUPABASE_URL}/rest/v1/students`);
+    endpoint.search = new URLSearchParams({
+      select: "id,name,username,active",
+      "username": `eq.${username}`,
+      "pin": `eq.${pin}`,
+      "active": "eq.true",
+      limit: "1",
+    }).toString();
 
-    const res = await fetch(url, {
+    const res = await fetch(endpoint.toString(), {
       method: "GET",
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     });
 
+    // Se der erro, vamos ler o texto pra saber o motivo (RLS, permissão, etc.)
     if (!res.ok) {
-      // 401/403 geralmente é RLS/policy
-      throw new Error(`HTTP ${res.status}`);
+      const errText = await res.text().catch(() => "");
+      console.error("HTTP:", res.status, errText);
+      return showError(`Erro no servidor (HTTP ${res.status}). Veja o Console.`);
     }
 
     const data = await res.json();
+
+    console.log("Resultado:", data); // <- DEBUG
 
     if (!Array.isArray(data) || data.length === 0) {
       return showError("Usuário ou PIN inválido.");
@@ -54,10 +59,9 @@ async function login() {
     const student = data[0];
     localStorage.setItem("edulegal_student", JSON.stringify(student));
 
-    // Próxima tela (vamos criar já já)
     window.location.href = "chat.html";
   } catch (err) {
-    console.error(err);
+    console.error("Erro:", err);
     showError("Erro de conexão com o servidor");
   }
 }
@@ -72,5 +76,6 @@ btnLogin?.addEventListener("click", (e) => {
 pinEl?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") login();
 });
+
 
 
