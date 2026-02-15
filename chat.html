@@ -15,6 +15,17 @@
 
 <button onclick="logout()">Sair</button>
 
+<!-- 1️⃣ Carrega Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2️⃣ Cria o cliente -->
+<script>
+  const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
+  const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
+  window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
+<!-- 3️⃣ Seu código da página -->
 <script>
 const student = JSON.parse(localStorage.getItem("edulegal_student"));
 
@@ -27,6 +38,7 @@ document.getElementById("studentInfo").innerHTML =
 
 function logout() {
   localStorage.removeItem("edulegal_student");
+  window.supabaseClient.auth.signOut(); // 🔥 importante agora
   window.location.href = "index.html";
 }
 </script>
