@@ -10,23 +10,33 @@ function showError(msg) {
 }
 
 async function login() {
-
   const username = usernameEl.value.trim();
   const pin = pinEl.value.trim();
 
-  console.log("Tentando login:", username, pin);
+  if (!username || !pin) return showError("Preencha username e PIN.");
 
   try {
+    // 1) Login REAL via Supabase Auth
+    const email = `${username}@edulegal.app`;
+    const { data: authData, error: authError } =
+      await window.supabaseClient.auth.signInWithPassword({
+        email,
+        password: pin
+      });
 
+    if (authError || !authData?.session) {
+      return showError("Usuário ou PIN inválido.");
+    }
+
+    const uid = authData.session.user.id; // auth.uid()
+
+    // 2) Buscar dados do aluno na tabela students (sem checar PIN aqui)
     const url =
       `${SUPABASE_URL}/rest/v1/students` +
       `?select=*` +
       `&username=eq.${encodeURIComponent(username)}` +
-      `&pin=eq.${encodeURIComponent(pin)}` +
       `&active=eq.true` +
       `&limit=1`;
-
-    console.log("URL:", url);
 
     const res = await fetch(url, {
       headers: {
@@ -35,24 +45,21 @@ async function login() {
       }
     });
 
-    console.log("Status HTTP:", res.status);
-
-    const data = await res.json();
-
-    console.log("Resultado:", data);
-
-    if (!data || data.length === 0) {
-      return showError("Usuário ou PIN inválido.");
+    const rows = await res.json();
+    if (!rows || rows.length === 0) {
+      // se não achar aluno ativo, derruba a sessão por segurança
+      await window.supabaseClient.auth.signOut();
+      return showError("Aluno não encontrado/ativo.");
     }
 
-    const student = data[0];
+    const student = rows[0];
 
+    // 3) Guardar sessão mínima local (MVP)
+    localStorage.setItem("edulegal_auth_uid", uid);
     localStorage.setItem("edulegal_student", JSON.stringify(student));
 
     alert("Login OK!");
-
     window.location.href = "chat.html";
-
   } catch (err) {
     console.error(err);
     showError("Erro de conexão com o servidor");
@@ -64,6 +71,7 @@ btnLogin.addEventListener("click", login);
 pinEl.addEventListener("keydown", e => {
   if (e.key === "Enter") login();
 });
+
 
 
 
