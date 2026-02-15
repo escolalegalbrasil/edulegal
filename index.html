@@ -43,13 +43,14 @@
   const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
   const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
 
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  console.log("Supabase conectado:", supabase);
+  console.log("Supabase conectado:", window.supabaseClient);
 </script>
 
 </body>
 </html>
+
 
 
 
