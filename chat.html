@@ -27,18 +27,58 @@
 
 <!-- 3️⃣ Seu código da página -->
 <script>
-const student = JSON.parse(localStorage.getItem("edulegal_student"));
+(async function init() {
+  // 1) Checa sessão
+  const { data: sessionData, error: sessionErr } = await window.supabaseClient.auth.getSession();
+  const session = sessionData?.session;
 
-if (!student) {
-  window.location.href = "index.html";
-}
+  if (sessionErr || !session) {
+    window.location.href = "index.html";
+    return;
+  }
 
-document.getElementById("studentInfo").innerHTML =
-  `<p>Olá, ${student.name} 👋</p>`;
+  // 2) Busca trails do aluno logado
+  const { data: trails, error } = await window.supabaseClient
+    .from("trails")
+    .select("id,title,content,created_at")
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    document.getElementById("studentInfo").innerHTML = `<p>Erro ao carregar mentoria: ${error.message}</p>`;
+    return;
+  }
+
+  if (!trails || trails.length === 0) {
+    document.getElementById("studentInfo").innerHTML = "<p>Nenhuma mentoria encontrada ainda.</p>";
+    return;
+  }
+
+  const trail = trails[0];
+  const content = trail.content || {};
+  const quests = Array.isArray(content.quests) ? content.quests : [];
+
+  // 3) Render mínimo (título + primeira quest)
+  let html = `<h2>${trail.title || "Mentoria"}</h2>`;
+
+  if (quests.length === 0) {
+    html += `<pre style="white-space:pre-wrap">${JSON.stringify(content, null, 2)}</pre>`;
+  } else {
+    const q1 = quests[0];
+    html += `
+      <h3>Quest 1</h3>
+      <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || "(sem objetivo)"}</p>
+      <p><b>Pergunta inicial:</b> ${q1.question || q1.initial_question || "(sem pergunta)"}</p>
+      <p><b>Mini-desafio:</b> ${(q1.challenge || q1.mini_challenge?.instruction || "(sem desafio)")}</p>
+    `;
+  }
+
+  document.getElementById("studentInfo").innerHTML = html;
+})();
 
 function logout() {
   localStorage.removeItem("edulegal_student");
-  window.supabaseClient.auth.signOut(); // 🔥 importante agora
+  window.supabaseClient.auth.signOut();
   window.location.href = "index.html";
 }
 </script>
