@@ -190,6 +190,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     const imageUrl = data.signedUrl;
 
     await sendMessage(`EVIDÊNCIA_PRINT (analisar imagem): ${imageUrl}`);
+    
 
     fileInput.value = "";
     uploadBtn.disabled = false;
