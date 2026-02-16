@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EduLegal - Login Professor</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<h1>Login do Professor 🎓</h1>
+
+<div style="max-width:420px; display:flex; flex-direction:column; gap:10px;">
+  <input id="email" type="email" placeholder="Email do professor" />
+  <input id="password" type="password" placeholder="Senha" />
+  <button id="btnProfLogin">Entrar</button>
+  <p id="status"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
+const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
+window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const emailEl = document.getElementById("email");
+const passEl = document.getElementById("password");
+const btn = document.getElementById("btnProfLogin");
+const statusEl = document.getElementById("status");
+
+btn.addEventListener("click", async () => {
+  const email = emailEl.value.trim();
+  const password = passEl.value.trim();
+  if (!email || !password) {
+    statusEl.textContent = "Preencha email e senha.";
+    return;
+  }
+
+  btn.disabled = true;
+  statusEl.textContent = "Entrando...";
+
+  const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+
+  if (error || !data?.session) {
+    statusEl.textContent = "Login inválido.";
+    return;
+  }
+
+  window.location.href = "admin.html";
+});
+
+passEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") btn.click();
+});
+</script>
+
+</body>
+</html>
