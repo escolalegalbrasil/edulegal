@@ -1,1 +1,99 @@
-<h1>Painel do Professor 🚀</h1>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduLegal - Painel do Professor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Painel do Professor 🎓</h1>
+
+<div style="max-width:600px; display:flex; flex-direction:column; gap:12px;">
+
+  <label>Selecionar aluno:</label>
+  <select id="studentSelect"></select>
+
+  <label>Objetivo / Brief da aula:</label>
+  <textarea id="teacherBrief" rows="4" placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
+
+  <button id="generateBtn">Gerar Mentoria</button>
+
+  <p id="status"></p>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
+const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
+window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
+<script>
+(async function init() {
+
+  const { data: sessionData } = await window.supabaseClient.auth.getSession();
+  const session = sessionData?.session;
+
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const studentSelect = document.getElementById("studentSelect");
+  const generateBtn = document.getElementById("generateBtn");
+  const teacherBriefEl = document.getElementById("teacherBrief");
+  const statusEl = document.getElementById("status");
+
+  // Carregar alunos
+  const { data: students } = await window.supabaseClient
+    .from("students")
+    .select("id,name")
+    .order("name");
+
+  students.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.name;
+    studentSelect.appendChild(opt);
+  });
+
+  generateBtn.addEventListener("click", async () => {
+
+    const studentId = studentSelect.value;
+    const teacherBrief = teacherBriefEl.value.trim();
+
+    if (!studentId || !teacherBrief) {
+      statusEl.textContent = "Preencha os campos.";
+      return;
+    }
+
+    generateBtn.disabled = true;
+    statusEl.textContent = "Gerando mentoria...";
+
+    const { data, error } = await window.supabaseClient.functions.invoke("generate-trail", {
+      body: {
+        student_id: studentId,
+        teacher_brief: teacherBrief
+      }
+    });
+
+    generateBtn.disabled = false;
+
+    if (error) {
+      statusEl.textContent = "Erro ao gerar mentoria.";
+      return;
+    }
+
+    statusEl.textContent = "Mentoria criada com sucesso!";
+  });
+
+})();
+</script>
+
+</body>
+</html>
