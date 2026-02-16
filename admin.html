@@ -17,7 +17,7 @@
   <select id="studentSelect"></select>
 
   <label>Objetivo / Brief da aula:</label>
-  <textarea id="teacherBrief" rows="4" placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
+  <textarea id="teacherBrief" rows="6" placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
 
   <button id="generateBtn">Gerar Mentoria</button>
 
@@ -46,35 +46,51 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   const userId = session.user.id;
 
-const { data: teacher } = await window.supabaseClient
-  .from("teachers")
-  .select("id")
-  .eq("id", userId)
-  .single();
+  // ✅ Verifica se é professor (tabela teachers)
+  const { data: teacher, error: teacherErr } = await window.supabaseClient
+    .from("teachers")
+    .select("id")
+    .eq("id", userId)
+    .single();
 
-if (!teacher) {
-  alert("Acesso permitido apenas para professores.");
-  window.location.href = "chat.html";
-  return;
-}
+  if (teacherErr) {
+    console.error("Erro ao checar teacher:", teacherErr);
+  }
+
+  if (!teacher) {
+    alert("Acesso permitido apenas para professores.");
+    window.location.href = "chat.html";
+    return;
+  }
 
   const studentSelect = document.getElementById("studentSelect");
   const generateBtn = document.getElementById("generateBtn");
   const teacherBriefEl = document.getElementById("teacherBrief");
   const statusEl = document.getElementById("status");
 
-  // Carregar alunos
-  const { data: students } = await window.supabaseClient
+  // ✅ Carregar alunos
+  const { data: students, error: studentsErr } = await window.supabaseClient
     .from("students")
     .select("id,name")
     .order("name");
 
-  students.forEach(s => {
+  if (studentsErr) {
+    console.error("Erro ao carregar students:", studentsErr);
+    statusEl.textContent = "Erro ao carregar alunos: " + (studentsErr.message || "");
+    return;
+  }
+
+  if (!students || students.length === 0) {
+    statusEl.textContent = "Nenhum aluno encontrado.";
+    return;
+  }
+
+  for (const s of students) {
     const opt = document.createElement("option");
     opt.value = s.id;
     opt.textContent = s.name;
     studentSelect.appendChild(opt);
-  });
+  }
 
   generateBtn.addEventListener("click", async () => {
 
@@ -96,10 +112,20 @@ if (!teacher) {
       }
     });
 
+    console.log("generate-trail data:", data);
+
     generateBtn.disabled = false;
 
     if (error) {
-      statusEl.textContent = "Erro ao gerar mentoria.";
+      console.error("generate-trail error:", error);
+      statusEl.textContent = "Erro: " + (error.message || JSON.stringify(error));
+      return;
+    }
+
+    // Se a função retornar um ok:false dentro de data
+    if (data && data.ok === false) {
+      console.error("generate-trail returned ok:false:", data);
+      statusEl.textContent = "Erro: " + (data.details || data.error || "falha ao gerar mentoria");
       return;
     }
 
