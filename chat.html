@@ -18,6 +18,10 @@
   <div id="messages" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"></div>
 
   <textarea id="chatInput" rows="3" style="width:100%; box-sizing:border-box;" placeholder="Escreva aqui..."></textarea>
+
+  <input type="file" id="fileInput" accept="image/*" style="margin-top:8px;" />
+  <button id="uploadBtn" style="margin-top:8px;">Enviar print</button>
+  
   <button id="sendBtn" style="margin-top:8px;">Enviar</button>
 
   <p id="chatStatus" style="margin-top:8px; font-size:12px; opacity:0.8;"></p>
@@ -25,21 +29,17 @@
 
 <button onclick="logout()">Sair</button>
 
-<!-- 1️⃣ Carrega Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 2️⃣ Cria o cliente -->
 <script>
 const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
 const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
 window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 </script>
 
-<!-- 3️⃣ Script principal -->
 <script>
 (async function init() {
 
-  // Verifica sessão
   const { data: sessionData } = await window.supabaseClient.auth.getSession();
   const session = sessionData?.session;
 
@@ -48,7 +48,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     return;
   }
 
-  // Busca mentoria
   const { data: trails } = await window.supabaseClient
     .from("trails")
     .select("id,title,content,created_at")
@@ -69,39 +68,29 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   if (quests.length > 0) {
     const q1 = quests[0];
     html += `
-      <h3>Quest 1</h3>
+      <h3>Quest Atual</h3>
       <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || ""}</p>
-      <p><b>Pergunta inicial:</b> ${q1.question || q1.initial_question || ""}</p>
-      <p><b>Mini-desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
+      <p><b>Pergunta:</b> ${q1.question || q1.initial_question || ""}</p>
+      <p><b>Desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
     `;
   }
 
   document.getElementById("studentInfo").innerHTML = html;
 
-  // ===== CHAT =====
-
   const messagesEl = document.getElementById("messages");
   const inputEl = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const fileInput = document.getElementById("fileInput");
   const statusEl = document.getElementById("chatStatus");
 
   function renderMessages(rows) {
     messagesEl.innerHTML = "";
     for (const m of rows) {
       const bubble = document.createElement("div");
-      bubble.style.padding = "8px 10px";
-      bubble.style.borderRadius = "10px";
-      bubble.style.maxWidth = "90%";
-      bubble.style.whiteSpace = "pre-wrap";
-
-      if (m.role === "student") {
-        bubble.style.alignSelf = "flex-end";
-        bubble.style.border = "1px solid #cfc";
-      } else {
-        bubble.style.alignSelf = "flex-start";
-        bubble.style.border = "1px solid #ccf";
-      }
-
+      bubble.style.padding = "8px";
+      bubble.style.borderRadius = "8px";
+      bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
       bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${m.content}`;
       messagesEl.appendChild(bubble);
     }
@@ -117,37 +106,69 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     renderMessages(rows || []);
   }
 
-  async function sendMessage() {
-    const text = inputEl.value.trim();
+  async function sendMessage(text) {
     if (!text) return;
 
     sendBtn.disabled = true;
     statusEl.textContent = "Enviando...";
 
-    const { data, error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
+    const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
       body: { trail_id: trail.id, message: text }
     });
 
+    sendBtn.disabled = false;
+    statusEl.textContent = "";
+
     if (error) {
       statusEl.textContent = "Erro ao enviar mensagem.";
-      sendBtn.disabled = false;
       return;
     }
 
     inputEl.value = "";
-    statusEl.textContent = "";
-    sendBtn.disabled = false;
-
     await loadMessages();
   }
 
-  sendBtn.addEventListener("click", sendMessage);
+  sendBtn.addEventListener("click", () => {
+    sendMessage(inputEl.value.trim());
+  });
 
   inputEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      sendMessage(inputEl.value.trim());
     }
+  });
+
+  uploadBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    uploadBtn.disabled = true;
+    statusEl.textContent = "Enviando print...";
+
+    const userId = session.user.id;
+    const filePath = `${userId}/${trail.id}/${Date.now()}_${file.name}`;
+
+    const { error: uploadError } = await window.supabaseClient.storage
+      .from("evidence")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      statusEl.textContent = "Erro no upload.";
+      uploadBtn.disabled = false;
+      return;
+    }
+
+    const { data } = await window.supabaseClient.storage
+      .from("evidence")
+      .createSignedUrl(filePath, 3600);
+
+    const imageUrl = data.signedUrl;
+
+    await sendMessage(`Enviei um print como evidência: ${imageUrl}`);
+
+    fileInput.value = "";
+    uploadBtn.disabled = false;
   });
 
   await loadMessages();
