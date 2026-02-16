@@ -12,7 +12,6 @@
 <h1>Bem-vindo ao EduLegal 🚀</h1>
 
 <div id="studentInfo"></div>
-  
 
 <div id="chatBox" style="margin-top:16px; padding:12px; border:1px solid #ddd; max-width:520px;">
   <h3>Chat</h3>
@@ -23,7 +22,6 @@
 
   <p id="chatStatus" style="margin-top:8px; font-size:12px; opacity:0.8;"></p>
 </div>
-  
 
 <button onclick="logout()">Sair</button>
 
@@ -32,37 +30,33 @@
 
 <!-- 2️⃣ Cria o cliente -->
 <script>
-  const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
-  const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
-  window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
+const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
+window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 </script>
 
-<!-- 3️⃣ Seu código da página -->
+<!-- 3️⃣ Script principal -->
 <script>
 (async function init() {
-  // 1) Checa sessão
-  const { data: sessionData, error: sessionErr } = await window.supabaseClient.auth.getSession();
+
+  // Verifica sessão
+  const { data: sessionData } = await window.supabaseClient.auth.getSession();
   const session = sessionData?.session;
 
-  if (sessionErr || !session) {
+  if (!session) {
     window.location.href = "index.html";
     return;
   }
 
-  // 2) Busca trails do aluno logado
-  const { data: trails, error } = await window.supabaseClient
+  // Busca mentoria
+  const { data: trails } = await window.supabaseClient
     .from("trails")
     .select("id,title,content,created_at")
     .order("created_at", { ascending: false })
     .limit(1);
 
-  if (error) {
-    document.getElementById("studentInfo").innerHTML = `<p>Erro ao carregar mentoria: ${error.message}</p>`;
-    return;
-  }
-
   if (!trails || trails.length === 0) {
-    document.getElementById("studentInfo").innerHTML = "<p>Nenhuma mentoria encontrada ainda.</p>";
+    document.getElementById("studentInfo").innerHTML = "<p>Nenhuma mentoria encontrada.</p>";
     return;
   }
 
@@ -70,27 +64,97 @@
   const content = trail.content || {};
   const quests = Array.isArray(content.quests) ? content.quests : [];
 
-  // 3) Render mínimo (título + primeira quest)
   let html = `<h2>${trail.title || "Mentoria"}</h2>`;
 
-  if (quests.length === 0) {
-    html += `<pre style="white-space:pre-wrap">${JSON.stringify(content, null, 2)}</pre>`;
-  } else {
+  if (quests.length > 0) {
     const q1 = quests[0];
     html += `
       <h3>Quest 1</h3>
-      <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || "(sem objetivo)"}</p>
-      <p><b>Pergunta inicial:</b> ${q1.question || q1.initial_question || "(sem pergunta)"}</p>
-      <p><b>Mini-desafio:</b> ${(q1.challenge || q1.mini_challenge?.instruction || "(sem desafio)")}</p>
+      <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || ""}</p>
+      <p><b>Pergunta inicial:</b> ${q1.question || q1.initial_question || ""}</p>
+      <p><b>Mini-desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
     `;
   }
 
   document.getElementById("studentInfo").innerHTML = html;
+
+  // ===== CHAT =====
+
+  const messagesEl = document.getElementById("messages");
+  const inputEl = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const statusEl = document.getElementById("chatStatus");
+
+  function renderMessages(rows) {
+    messagesEl.innerHTML = "";
+    for (const m of rows) {
+      const bubble = document.createElement("div");
+      bubble.style.padding = "8px 10px";
+      bubble.style.borderRadius = "10px";
+      bubble.style.maxWidth = "90%";
+      bubble.style.whiteSpace = "pre-wrap";
+
+      if (m.role === "student") {
+        bubble.style.alignSelf = "flex-end";
+        bubble.style.border = "1px solid #cfc";
+      } else {
+        bubble.style.alignSelf = "flex-start";
+        bubble.style.border = "1px solid #ccf";
+      }
+
+      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${m.content}`;
+      messagesEl.appendChild(bubble);
+    }
+  }
+
+  async function loadMessages() {
+    const { data: rows } = await window.supabaseClient
+      .from("messages")
+      .select("role,content,created_at")
+      .eq("trail_id", trail.id)
+      .order("created_at", { ascending: true });
+
+    renderMessages(rows || []);
+  }
+
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    sendBtn.disabled = true;
+    statusEl.textContent = "Enviando...";
+
+    const { data, error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
+      body: { trail_id: trail.id, message: text }
+    });
+
+    if (error) {
+      statusEl.textContent = "Erro ao enviar mensagem.";
+      sendBtn.disabled = false;
+      return;
+    }
+
+    inputEl.value = "";
+    statusEl.textContent = "";
+    sendBtn.disabled = false;
+
+    await loadMessages();
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  await loadMessages();
+
 })();
 
 async function logout() {
-  localStorage.removeItem("edulegal_student");
-  localStorage.removeItem("edulegal_auth_uid");
   await window.supabaseClient.auth.signOut();
   window.location.href = "index.html";
 }
