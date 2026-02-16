@@ -11,7 +11,14 @@
 
 <h1>Bem-vindo ao EduLegal 🚀</h1>
 
-<div id="studentInfo"></div>
+<div style="max-width:700px; display:flex; flex-direction:column; gap:10px;">
+  <label><b>Escolha a mentoria:</b></label>
+  <select id="trailSelect" style="max-width:520px;"></select>
+  <button id="openTrailBtn" style="max-width:220px;">Abrir mentoria</button>
+  <p id="trailStatus" style="font-size:12px; opacity:0.8;"></p>
+</div>
+
+<div id="studentInfo" style="margin-top:14px;"></div>
 
 <div id="chatBox" style="margin-top:16px; padding:12px; border:1px solid #ddd; max-width:520px;">
   <h3>Chat</h3>
@@ -21,7 +28,7 @@
 
   <input type="file" id="fileInput" accept="image/*" style="margin-top:8px;" />
   <button id="uploadBtn" style="margin-top:8px;">Enviar print</button>
-  
+
   <button id="sendBtn" style="margin-top:8px;">Enviar</button>
 
   <p id="chatStatus" style="margin-top:8px; font-size:12px; opacity:0.8;"></p>
@@ -48,103 +55,153 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     return;
   }
 
-  const { data: trails } = await window.supabaseClient
-    .from("trails")
-    .select("id,title,content,created_at")
-    .order("created_at", { ascending: false })
-    .limit(1);
+  // UI refs
+  const trailSelect = document.getElementById("trailSelect");
+  const openTrailBtn = document.getElementById("openTrailBtn");
+  const trailStatus = document.getElementById("trailStatus");
 
-  if (!trails || trails.length === 0) {
-    document.getElementById("studentInfo").innerHTML = "<p>Nenhuma mentoria encontrada.</p>";
-    return;
-  }
-
-  const trail = trails[0];
-  const content = trail.content || {};
-  const quests = Array.isArray(content.quests) ? content.quests : [];
-
-  let html = `<h2>${trail.title || "Mentoria"}</h2>`;
-
-  if (quests.length > 0) {
-    const q1 = quests[0];
-    html += `
-      <h3>Quest Atual</h3>
-      <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || ""}</p>
-      <p><b>Pergunta:</b> ${q1.question || q1.initial_question || ""}</p>
-      <p><b>Desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
-    `;
-  }
-
-  document.getElementById("studentInfo").innerHTML = html;
-
+  const studentInfoEl = document.getElementById("studentInfo");
   const messagesEl = document.getElementById("messages");
   const inputEl = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
   const uploadBtn = document.getElementById("uploadBtn");
   const fileInput = document.getElementById("fileInput");
-  const statusEl = document.getElementById("chatStatus");
+  const chatStatus = document.getElementById("chatStatus");
+
+  // Estado atual
+  let currentTrail = null;
 
   function renderMessages(rows) {
-  messagesEl.innerHTML = "";
+    messagesEl.innerHTML = "";
 
-  for (const m of rows) {
-    const bubble = document.createElement("div");
-    bubble.style.padding = "8px";
-    bubble.style.borderRadius = "8px";
-    bubble.style.border = m.role === "student"
-      ? "1px solid #cfc"
-      : "1px solid #ccf";
-    bubble.style.whiteSpace = "pre-wrap";
+    for (const m of rows) {
+      const bubble = document.createElement("div");
+      bubble.style.padding = "8px";
+      bubble.style.borderRadius = "8px";
+      bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
+      bubble.style.whiteSpace = "pre-wrap";
 
-    const content = m.content || "";
+      const content = m.content || "";
+      const urlMatch = content.match(/https?:\/\/[^\s]+/);
 
-    // Procura qualquer URL dentro da mensagem
-    const urlMatch = content.match(/https?:\/\/[^\s]+/);
+      if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
+        const img = document.createElement("img");
+        img.src = urlMatch[0];
+        img.style.maxWidth = "100%";
+        img.style.marginTop = "6px";
+        img.style.borderRadius = "6px";
 
-    if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
+        bubble.appendChild(img);
+      } else {
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
+      }
 
-      const img = document.createElement("img");
-      img.src = urlMatch[0];
-      img.style.maxWidth = "100%";
-      img.style.marginTop = "6px";
-      img.style.borderRadius = "6px";
-
-      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
-      bubble.appendChild(img);
-
-    } else {
-      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
+      messagesEl.appendChild(bubble);
     }
-
-    messagesEl.appendChild(bubble);
   }
-}
 
   async function loadMessages() {
+    if (!currentTrail) return;
     const { data: rows } = await window.supabaseClient
       .from("messages")
       .select("role,content,created_at")
-      .eq("trail_id", trail.id)
+      .eq("trail_id", currentTrail.id)
       .order("created_at", { ascending: true });
 
     renderMessages(rows || []);
   }
 
+  function renderTrailInfo(trailRow) {
+    const content = trailRow.content || {};
+    const quests = Array.isArray(content.quests) ? content.quests : [];
+    const q1 = quests.length > 0 ? quests[0] : null;
+
+    let html = `<h2>${trailRow.title || "Mentoria"}</h2>`;
+
+    if (q1) {
+      html += `
+        <h3>Quest Atual</h3>
+        <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || ""}</p>
+        <p><b>Pergunta:</b> ${q1.question || q1.initial_question || ""}</p>
+        <p><b>Desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
+      `;
+    } else {
+      html += `<p>(Sem quests encontradas no conteúdo)</p>`;
+    }
+
+    studentInfoEl.innerHTML = html;
+  }
+
+  async function openTrail(trailId) {
+    trailStatus.textContent = "Carregando mentoria...";
+    chatStatus.textContent = "";
+
+    const { data: trailRow, error } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,content,created_at,current_quest")
+      .eq("id", trailId)
+      .single();
+
+    if (error || !trailRow) {
+      trailStatus.textContent = "Erro ao carregar mentoria.";
+      return;
+    }
+
+    currentTrail = trailRow;
+    renderTrailInfo(trailRow);
+    await loadMessages();
+    trailStatus.textContent = `Aberta: ${trailRow.title}`;
+  }
+
+  async function loadTrailsList() {
+    trailStatus.textContent = "Carregando lista de mentorias...";
+
+    const { data: rows, error } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      trailStatus.textContent = "Erro ao carregar mentorias.";
+      return;
+    }
+
+    trailSelect.innerHTML = "";
+    (rows || []).forEach((t) => {
+      const opt = document.createElement("option");
+      const dateTxt = t.created_at ? new Date(t.created_at).toLocaleString() : "";
+      opt.value = t.id;
+      opt.textContent = `${t.title || "Mentoria"}${dateTxt ? " — " + dateTxt : ""}`;
+      trailSelect.appendChild(opt);
+    });
+
+    if (!rows || rows.length === 0) {
+      trailStatus.textContent = "Nenhuma mentoria encontrada.";
+      return;
+    }
+
+    // abre automaticamente a mais recente
+    await openTrail(rows[0].id);
+  }
+
   async function sendMessage(text) {
+    if (!currentTrail) return;
     if (!text) return;
 
     sendBtn.disabled = true;
-    statusEl.textContent = "Enviando...";
+    chatStatus.textContent = "Enviando...";
 
     const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
-      body: { trail_id: trail.id, message: text }
+      body: { trail_id: currentTrail.id, message: text }
     });
 
     sendBtn.disabled = false;
-    statusEl.textContent = "";
+    chatStatus.textContent = "";
 
     if (error) {
-      statusEl.textContent = "Erro ao enviar mensagem.";
+      chatStatus.textContent = "Erro ao enviar mensagem.";
       return;
     }
 
@@ -164,21 +221,23 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   });
 
   uploadBtn.addEventListener("click", async () => {
+    if (!currentTrail) return;
+
     const file = fileInput.files[0];
     if (!file) return;
 
     uploadBtn.disabled = true;
-    statusEl.textContent = "Enviando print...";
+    chatStatus.textContent = "Enviando print...";
 
     const userId = session.user.id;
-    const filePath = `${userId}/${trail.id}/${Date.now()}_${file.name}`;
+    const filePath = `${userId}/${currentTrail.id}/${Date.now()}_${file.name}`;
 
     const { error: uploadError } = await window.supabaseClient.storage
       .from("evidence")
       .upload(filePath, file);
 
     if (uploadError) {
-      statusEl.textContent = "Erro no upload.";
+      chatStatus.textContent = "Erro no upload.";
       uploadBtn.disabled = false;
       return;
     }
@@ -190,13 +249,20 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     const imageUrl = data.signedUrl;
 
     await sendMessage(`EVIDÊNCIA_PRINT (analisar imagem): ${imageUrl}`);
-    
 
     fileInput.value = "";
     uploadBtn.disabled = false;
+    chatStatus.textContent = "";
   });
 
-  await loadMessages();
+  openTrailBtn.addEventListener("click", async () => {
+    const id = trailSelect.value;
+    if (!id) return;
+    await openTrail(id);
+  });
+
+  // init
+  await loadTrailsList();
 
 })();
 
