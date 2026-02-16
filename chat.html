@@ -85,16 +85,35 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const statusEl = document.getElementById("chatStatus");
 
   function renderMessages(rows) {
-    messagesEl.innerHTML = "";
-    for (const m of rows) {
-      const bubble = document.createElement("div");
-      bubble.style.padding = "8px";
-      bubble.style.borderRadius = "8px";
-      bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
-      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${m.content}`;
-      messagesEl.appendChild(bubble);
+  messagesEl.innerHTML = "";
+
+  for (const m of rows) {
+    const bubble = document.createElement("div");
+    bubble.style.padding = "8px";
+    bubble.style.borderRadius = "8px";
+    bubble.style.border = m.role === "student"
+      ? "1px solid #cfc"
+      : "1px solid #ccf";
+
+    const content = m.content || "";
+
+    // 🔥 Se a mensagem contém link do bucket evidence, renderiza imagem
+    if (content.includes("/storage/v1/object/sign/evidence/")) {
+      const img = document.createElement("img");
+      img.src = content.match(/https?:\/\/[^\s]+/)[0];
+      img.style.maxWidth = "100%";
+      img.style.marginTop = "6px";
+
+      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>`;
+      bubble.appendChild(img);
+
+    } else {
+      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
     }
+
+    messagesEl.appendChild(bubble);
   }
+}
 
   async function loadMessages() {
     const { data: rows } = await window.supabaseClient
