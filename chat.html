@@ -101,6 +101,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   messagesEl.scrollTop = messagesEl.scrollHeight;
+   
 }
 
 async function loadMessages() {
@@ -116,11 +117,16 @@ async function loadMessages() {
   renderMessages(safeRows);
 
   // Só “desce” se já existe conversa
-  if (safeRows.length > 0) {
-    setTimeout(() => {
-      document.getElementById("chatBox").scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }
+ if (safeRows.length > 0) {
+  setTimeout(() => {
+    // 1) garante que o chat está visível
+    document.getElementById("chatBox").scrollIntoView({ behavior: "smooth", block: "end" });
+
+    // 2) rola para a última mensagem (janela inteira)
+    const last = messagesEl.lastElementChild;
+    if (last) last.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, 150);
+}
 }
 
   function renderTrailInfo(trailRow) {
