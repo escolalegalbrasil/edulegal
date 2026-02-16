@@ -71,46 +71,57 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   // Estado atual
   let currentTrail = null;
 
-  function renderMessages(rows) {
-    messagesEl.innerHTML = "";
+ function renderMessages(rows) {
+  messagesEl.innerHTML = "";
 
-    for (const m of rows) {
-      const bubble = document.createElement("div");
-      bubble.style.padding = "8px";
-      bubble.style.borderRadius = "8px";
-      bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
-      bubble.style.whiteSpace = "pre-wrap";
+  for (const m of rows) {
+    const bubble = document.createElement("div");
+    bubble.style.padding = "8px";
+    bubble.style.borderRadius = "8px";
+    bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
+    bubble.style.whiteSpace = "pre-wrap";
 
-      const content = m.content || "";
-      const urlMatch = content.match(/https?:\/\/[^\s]+/);
+    const content = m.content || "";
+    const urlMatch = content.match(/https?:\/\/[^\s]+/);
 
-      if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
-        const img = document.createElement("img");
-        img.src = urlMatch[0];
-        img.style.maxWidth = "100%";
-        img.style.marginTop = "6px";
-        img.style.borderRadius = "6px";
+    if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
+      const img = document.createElement("img");
+      img.src = urlMatch[0];
+      img.style.maxWidth = "100%";
+      img.style.marginTop = "6px";
+      img.style.borderRadius = "6px";
 
-        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
-        bubble.appendChild(img);
-      } else {
-        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
-      }
-
-      messagesEl.appendChild(bubble);
+      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
+      bubble.appendChild(img);
+    } else {
+      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
     }
+
+    messagesEl.appendChild(bubble);
   }
 
-  async function loadMessages() {
-    if (!currentTrail) return;
-    const { data: rows } = await window.supabaseClient
-      .from("messages")
-      .select("role,content,created_at")
-      .eq("trail_id", currentTrail.id)
-      .order("created_at", { ascending: true });
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
 
-    renderMessages(rows || []);
+async function loadMessages() {
+  if (!currentTrail) return;
+
+  const { data: rows } = await window.supabaseClient
+    .from("messages")
+    .select("role,content,created_at")
+    .eq("trail_id", currentTrail.id)
+    .order("created_at", { ascending: true });
+
+  const safeRows = rows || [];
+  renderMessages(safeRows);
+
+  // Só “desce” se já existe conversa
+  if (safeRows.length > 0) {
+    setTimeout(() => {
+      document.getElementById("chatBox").scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   }
+}
 
   function renderTrailInfo(trailRow) {
     const content = trailRow.content || {};
