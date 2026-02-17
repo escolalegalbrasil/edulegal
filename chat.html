@@ -20,6 +20,13 @@
 
 <div id="studentInfo" style="margin-top:14px;"></div>
 
+<!-- ✅ NOVO: Progresso Quest/Desafio -->
+<div id="progressInfo" style="margin-top:10px; max-width:520px; padding:10px; border:1px dashed #ddd;">
+  <b>Progresso:</b>
+  <span id="questLabel">Quest 1</span> ·
+  <span id="stepLabel">Desafio 1</span>
+</div>
+
 <div id="chatBox" style="margin-top:16px; padding:12px; border:1px solid #ddd; max-width:520px;">
   <h3>Chat</h3>
   <div id="messages" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"></div>
@@ -67,6 +74,10 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const uploadBtn = document.getElementById("uploadBtn");
   const fileInput = document.getElementById("fileInput");
   const chatStatus = document.getElementById("chatStatus");
+
+  // ✅ NOVO: labels progresso
+  const questLabel = document.getElementById("questLabel");
+  const stepLabel = document.getElementById("stepLabel");
 
   // Estado atual
   let currentTrail = null;
@@ -132,16 +143,31 @@ async function loadMessages() {
   function renderTrailInfo(trailRow) {
     const content = trailRow.content || {};
     const quests = Array.isArray(content.quests) ? content.quests : [];
-    const q1 = quests.length > 0 ? quests[0] : null;
+
+    // ✅ usa quest/step atuais do banco
+    const currentQuestNum = trailRow.current_quest ?? 1;
+    const currentStepNum = trailRow.current_step ?? 1;
+
+    const quest = quests[currentQuestNum - 1] || null;
+
+    // compatibilidade: se não houver steps[], usa campos antigos da quest
+    const steps = Array.isArray(quest?.steps) ? quest.steps : null;
+    const step = steps ? (steps[currentStepNum - 1] || steps[steps.length - 1]) : null;
 
     let html = `<h2>${trailRow.title || "Mentoria"}</h2>`;
 
-    if (q1) {
+    if (quest) {
+      const objective = (step?.objective) || quest.goal || quest.micro_objective || "";
+      const evidence = (step?.evidence_required) || quest.evidence || "";
+      const cognitive = (step?.cognitive_check) || "";
+
       html += `
         <h3>Quest Atual</h3>
-        <p><b>Objetivo:</b> ${q1.goal || q1.micro_objective || ""}</p>
-        <p><b>Pergunta:</b> ${q1.question || q1.initial_question || ""}</p>
-        <p><b>Desafio:</b> ${q1.challenge || q1.mini_challenge?.instruction || ""}</p>
+        <p><b>Quest:</b> ${currentQuestNum}</p>
+        <p><b>Desafio:</b> ${currentStepNum}</p>
+        <p><b>Objetivo:</b> ${objective}</p>
+        ${evidence ? `<p><b>Evidência esperada:</b> ${evidence}</p>` : ""}
+        ${cognitive ? `<p><b>Checagem:</b> ${cognitive}</p>` : ""}
       `;
     } else {
       html += `<p>(Sem quests encontradas no conteúdo)</p>`;
@@ -156,7 +182,7 @@ async function loadMessages() {
 
     const { data: trailRow, error } = await window.supabaseClient
       .from("trails")
-      .select("id,title,content,created_at,current_quest")
+      .select("id,title,content,created_at,current_quest,current_step")
       .eq("id", trailId)
       .single();
 
@@ -167,6 +193,11 @@ async function loadMessages() {
 
     currentTrail = trailRow;
     renderTrailInfo(trailRow);
+
+    // ✅ atualiza labels de progresso
+    questLabel.textContent = `Quest ${trailRow.current_quest ?? 1}`;
+    stepLabel.textContent = `Desafio ${trailRow.current_step ?? 1}`;
+
     await loadMessages();
     trailStatus.textContent = `Aberta: ${trailRow.title}`;
   }
@@ -223,6 +254,21 @@ async function loadMessages() {
     }
 
     inputEl.value = "";
+
+    // ✅ NOVO: Recarrega trail para atualizar Quest/Desafio no topo
+    const { data: updatedTrail } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,content,created_at,current_quest,current_step")
+      .eq("id", currentTrail.id)
+      .single();
+
+    if (updatedTrail) {
+      currentTrail = updatedTrail;
+      renderTrailInfo(updatedTrail);
+      questLabel.textContent = `Quest ${updatedTrail.current_quest ?? 1}`;
+      stepLabel.textContent = `Desafio ${updatedTrail.current_step ?? 1}`;
+    }
+
     await loadMessages();
   }
 
