@@ -161,14 +161,20 @@ async function loadMessages() {
       const evidence = (step?.evidence_required) || quest.evidence || "";
       const cognitive = (step?.cognitive_check) || "";
 
-      html += `
-        <h3>Quest Atual</h3>
-        <p><b>Quest:</b> ${currentQuestNum}</p>
-        <p><b>Desafio:</b> ${currentStepNum}</p>
-        <p><b>Objetivo:</b> ${objective}</p>
-        ${evidence ? `<p><b>Evidência esperada:</b> ${evidence}</p>` : ""}
-        ${cognitive ? `<p><b>Checagem:</b> ${cognitive}</p>` : ""}
-      `;
+      const hintsArr = Array.isArray(step?.hints) ? step.hints : [];
+      const hint1 = hintsArr.length > 0 ? hintsArr[0] : "";
+
+
+     html += `
+  <h3>Quest Atual</h3>
+  <p><b>Quest:</b> ${currentQuestNum}</p>
+  <p><b>Desafio:</b> ${currentStepNum}</p>
+  <p><b>Objetivo:</b> ${objective}</p>
+  ${hint1 ? `<p><b>Pista:</b> ${hint1}</p>` : ""}
+  ${evidence ? `<p><b>Evidência esperada:</b> ${evidence}</p>` : ""}
+  ${cognitive ? `<p><b>Checagem:</b> ${cognitive}</p>` : ""}
+`;
+
     } else {
       html += `<p>(Sem quests encontradas no conteúdo)</p>`;
     }
