@@ -5,43 +5,256 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EduLegal - Chat</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+  /* ===== Chat page (não altera seu style.css) ===== */
+  body {
+    background: #201b2c;
+    color: #f0ffffde;
+  }
+
+  /* Container grande e centralizado (alvo 1920 x 990) */
+  .chat-shell {
+    width: min(1920px, calc(100vw - 48px));
+    height: min(990px, calc(100vh - 48px));
+    margin: 24px auto;
+    background: #2f2841;
+    border-radius: 20px;
+    box-shadow: 0px 10px 40px #00000056;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Cabeçalho fixo */
+  .chat-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 18px 20px 14px;
+    background: #2f2841;
+    border-bottom: 1px solid #00000056;
+  }
+
+  .chat-header .mentoria-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #00ff88;
+    margin: 0 0 6px 0;
+    letter-spacing: 0.3px;
+  }
+
+  .chat-header .quest-line {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #77ffc0;
+  }
+
+  .chat-header .step-line {
+    font-size: 16px;
+    margin: 0;
+    color: #f0ffffde;
+    opacity: 0.95;
+  }
+
+  /* Área superior (seletor) */
+  .chat-topbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #00000056;
+    background: #2f2841;
+  }
+
+  .chat-topbar label {
+    font-weight: 700;
+    color: #f0ffffde;
+    margin-right: 8px;
+  }
+
+  .chat-topbar select {
+    width: min(680px, 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: #514869;
+    color: #f0ffffde;
+    font-size: 14pt;
+    box-shadow: 0px 10px 40px #00000056;
+    outline: none;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: #00ff88;
+    color: #2b134b;
+    box-shadow: 0px 10px 40px -12px #00ff8052;
+    white-space: nowrap;
+  }
+
+  .btn.secondary {
+    background: #514869;
+    color: #f0ffffde;
+    box-shadow: 0px 10px 40px #00000056;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .status {
+    font-size: 12pt;
+    color: #f0ffff94;
+    margin-left: auto;
+  }
+
+  /* Conteúdo principal: mensagens + composer */
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* importante para scroll */
+  }
+
+  .messages {
+    flex: 1;
+    overflow: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bubble {
+    padding: 12px 12px;
+    border-radius: 12px;
+    background: rgba(81, 72, 105, 0.35);
+    border: 1px solid #00000056;
+    font-size: 15.5pt;
+    line-height: 1.35;
+    white-space: pre-wrap;
+  }
+
+  .bubble.student {
+    border-color: rgba(0, 255, 136, 0.35);
+  }
+
+  .bubble.assistant {
+    border-color: rgba(119, 255, 192, 0.25);
+  }
+
+  .bubble b {
+    color: #77ffc0;
+  }
+
+  .composer {
+    padding: 14px 20px 18px;
+    border-top: 1px solid #00000056;
+    background: #2f2841;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .composer textarea {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    background: #514869;
+    color: #f0ffffde;
+    font-size: 15pt;
+    box-shadow: 0px 10px 40px #00000056;
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .composer-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .composer input[type="file"] {
+    color: #f0ffff94;
+  }
+
+  .footer-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logout {
+    margin: 0;
+  }
+
+  /* mobile/pequenas telas */
+  @media (max-width: 900px) {
+    .chat-shell {
+      width: calc(100vw - 18px);
+      height: calc(100vh - 18px);
+      margin: 9px auto;
+      border-radius: 14px;
+    }
+    .chat-topbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .status { margin-left: 0; }
+  }
+</style>
 </head>
 
 <body>
 
-<h1>Bem-vindo ao EduLegal 🚀</h1>
+<div class="chat-shell">
 
-<div style="max-width:700px; display:flex; flex-direction:column; gap:10px;">
-  <label><b>Escolha a mentoria:</b></label>
-  <select id="trailSelect" style="max-width:520px;"></select>
-  <button id="openTrailBtn" style="max-width:220px;">Abrir mentoria</button>
-  <p id="trailStatus" style="font-size:12px; opacity:0.8;"></p>
+  <!-- Topbar de seleção -->
+  <div class="chat-topbar">
+    <div style="display:flex; gap:10px; align-items:center; width:100%; flex-wrap:wrap;">
+      <label><b>Mentoria:</b></label>
+      <select id="trailSelect"></select>
+      <button id="openTrailBtn" class="btn">Abrir</button>
+      <p id="trailStatus" class="status"></p>
+    </div>
+  </div>
+
+  <!-- Cabeçalho fixo -->
+  <div class="chat-header">
+    <p id="mentoriaTitle" class="mentoria-title">Mentoria</p>
+    <p id="questLine" class="quest-line">Quest 1 — …</p>
+    <p id="stepLine" class="step-line">Desafio 1/1 — …</p>
+  </div>
+
+  <div class="chat-main">
+    <div id="messages" class="messages"></div>
+
+    <div class="composer">
+      <textarea id="chatInput" rows="3" placeholder="Escreva aqui..."></textarea>
+
+      <div class="composer-row">
+        <input type="file" id="fileInput" accept="image/*" />
+        <button id="uploadBtn" class="btn secondary">Enviar print</button>
+        <button id="sendBtn" class="btn">Enviar</button>
+        <span id="chatStatus" class="status"></span>
+      </div>
+
+      <div class="footer-row">
+        <span class="hint">Dica: Shift+Enter quebra linha.</span>
+        <button class="btn secondary logout" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </div>
 </div>
-
-<div id="studentInfo" style="margin-top:14px;"></div>
-
-<!-- ✅ NOVO: Progresso Quest/Desafio -->
-<div id="progressInfo" style="margin-top:10px; max-width:520px; padding:10px; border:1px dashed #ddd;">
-  <b>Progresso:</b>
-  <span id="questLabel">Quest 1</span> ·
-  <span id="stepLabel">Desafio 1</span>
-</div>
-
-<div id="chatBox" style="margin-top:16px; padding:12px; border:1px solid #ddd; max-width:520px;">
-  <h3>Chat</h3>
-  <div id="messages" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"></div>
-
-  <textarea id="chatInput" rows="3" style="width:100%; box-sizing:border-box;" placeholder="Escreva aqui..."></textarea>
-
-  <input type="file" id="fileInput" accept="image/*" style="margin-top:8px;" />
-  <button id="uploadBtn" style="margin-top:8px;">Enviar print</button>
-
-  <button id="sendBtn" style="margin-top:8px;">Enviar</button>
-
-  <p id="chatStatus" style="margin-top:8px; font-size:12px; opacity:0.8;"></p>
-</div>
-
-<button onclick="logout()">Sair</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -53,7 +266,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 <script>
 (async function init() {
-
   const { data: sessionData } = await window.supabaseClient.auth.getSession();
   const session = sessionData?.session;
 
@@ -67,7 +279,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const openTrailBtn = document.getElementById("openTrailBtn");
   const trailStatus = document.getElementById("trailStatus");
 
-  const studentInfoEl = document.getElementById("studentInfo");
   const messagesEl = document.getElementById("messages");
   const inputEl = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
@@ -75,111 +286,81 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const fileInput = document.getElementById("fileInput");
   const chatStatus = document.getElementById("chatStatus");
 
-  // ✅ NOVO: labels progresso
-  const questLabel = document.getElementById("questLabel");
-  const stepLabel = document.getElementById("stepLabel");
+  // Header refs
+  const mentoriaTitleEl = document.getElementById("mentoriaTitle");
+  const questLineEl = document.getElementById("questLine");
+  const stepLineEl = document.getElementById("stepLine");
 
-  // Estado atual
   let currentTrail = null;
 
- function renderMessages(rows) {
-  messagesEl.innerHTML = "";
-
-  for (const m of rows) {
-    const bubble = document.createElement("div");
-    bubble.style.padding = "8px";
-    bubble.style.borderRadius = "8px";
-    bubble.style.border = m.role === "student" ? "1px solid #cfc" : "1px solid #ccf";
-    bubble.style.whiteSpace = "pre-wrap";
-
-    const content = m.content || "";
-    const urlMatch = content.match(/https?:\/\/[^\s]+/);
-
-    if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
-      const img = document.createElement("img");
-      img.src = urlMatch[0];
-      img.style.maxWidth = "100%";
-      img.style.marginTop = "6px";
-      img.style.borderRadius = "6px";
-
-      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
-      bubble.appendChild(img);
-    } else {
-      bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
-    }
-
-    messagesEl.appendChild(bubble);
-  }
-
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-   
-}
-
-async function loadMessages() {
-  if (!currentTrail) return;
-
-  const { data: rows } = await window.supabaseClient
-    .from("messages")
-    .select("role,content,created_at")
-    .eq("trail_id", currentTrail.id)
-    .order("created_at", { ascending: true });
-
-  const safeRows = rows || [];
-  renderMessages(safeRows);
-
-  // Só “desce” se já existe conversa
- if (safeRows.length > 0) {
-  setTimeout(() => {
-    // 1) garante que o chat está visível
-    document.getElementById("chatBox").scrollIntoView({ behavior: "smooth", block: "end" });
-
-    // 2) rola para a última mensagem (janela inteira)
-    const last = messagesEl.lastElementChild;
-    if (last) last.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, 150);
-}
-}
-
-  function renderTrailInfo(trailRow) {
+  function getQuestAndStepTitles(trailRow) {
     const content = trailRow.content || {};
     const quests = Array.isArray(content.quests) ? content.quests : [];
 
-    // ✅ usa quest/step atuais do banco
-    const currentQuestNum = trailRow.current_quest ?? 1;
-    const currentStepNum = trailRow.current_step ?? 1;
+    const qNum = trailRow.current_quest ?? 1;
+    const sNum = trailRow.current_step ?? 1;
 
-    const quest = quests[currentQuestNum - 1] || null;
+    const quest = quests[qNum - 1] || null;
 
-    // compatibilidade: se não houver steps[], usa campos antigos da quest
+    // steps podem existir ou não
     const steps = Array.isArray(quest?.steps) ? quest.steps : null;
-    const step = steps ? (steps[currentStepNum - 1] || steps[steps.length - 1]) : null;
+    const totalSteps = steps ? steps.length : 1;
+    const step = steps ? (steps[sNum - 1] || steps[steps.length - 1]) : null;
 
-    let html = `<h2>${trailRow.title || "Mentoria"}</h2>`;
+    const questTitle = (quest?.title) ? quest.title : "Sem título";
+    const stepTitle = (step?.title) ? step.title : "Sem título";
 
-    if (quest) {
-      const objective = (step?.objective) || quest.goal || quest.micro_objective || "";
-      const evidence = (step?.evidence_required) || quest.evidence || "";
-      const cognitive = (step?.cognitive_check) || "";
+    return { qNum, sNum, totalSteps, questTitle, stepTitle };
+  }
 
-      const hintsArr = Array.isArray(step?.hints) ? step.hints : [];
-      const hint1 = hintsArr.length > 0 ? hintsArr[0] : "";
+  function renderHeader(trailRow) {
+    const { qNum, sNum, totalSteps, questTitle, stepTitle } = getQuestAndStepTitles(trailRow);
 
+    mentoriaTitleEl.textContent = trailRow.title || "Mentoria";
+    questLineEl.textContent = `Quest ${qNum} — ${questTitle}`;
+    stepLineEl.textContent = `Desafio ${sNum}/${totalSteps} — ${stepTitle}`;
+  }
 
-     html += `
-  <h3>Quest Atual</h3>
-  <p><b>Quest:</b> ${currentQuestNum}</p>
-  <p><b>Desafio:</b> ${currentStepNum}</p>
-  <p><b>Objetivo:</b> ${objective}</p>
-  ${hint1 ? `<p><b>Pista:</b> ${hint1}</p>` : ""}
-  ${evidence ? `<p><b>Evidência esperada:</b> ${evidence}</p>` : ""}
-  ${cognitive ? `<p><b>Checagem:</b> ${cognitive}</p>` : ""}
-`;
+  function renderMessages(rows) {
+    messagesEl.innerHTML = "";
 
-    } else {
-      html += `<p>(Sem quests encontradas no conteúdo)</p>`;
+    for (const m of rows) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${m.role === "student" ? "student" : "assistant"}`;
+
+      const content = m.content || "";
+      const urlMatch = content.match(/https?:\/\/[^\s]+/);
+
+      if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
+        const img = document.createElement("img");
+        img.src = urlMatch[0];
+        img.style.maxWidth = "100%";
+        img.style.marginTop = "10px";
+        img.style.borderRadius = "10px";
+
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
+        bubble.appendChild(img);
+      } else {
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
+      }
+
+      messagesEl.appendChild(bubble);
     }
 
-    studentInfoEl.innerHTML = html;
+    // scroll para baixo
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  async function loadMessages() {
+    if (!currentTrail) return;
+
+    const { data: rows } = await window.supabaseClient
+      .from("messages")
+      .select("role,content,created_at")
+      .eq("trail_id", currentTrail.id)
+      .order("created_at", { ascending: true });
+
+    renderMessages(rows || []);
   }
 
   async function openTrail(trailId) {
@@ -198,12 +379,7 @@ async function loadMessages() {
     }
 
     currentTrail = trailRow;
-    renderTrailInfo(trailRow);
-
-    // ✅ atualiza labels de progresso
-    questLabel.textContent = `Quest ${trailRow.current_quest ?? 1}`;
-    stepLabel.textContent = `Desafio ${trailRow.current_step ?? 1}`;
-
+    renderHeader(trailRow);
     await loadMessages();
     trailStatus.textContent = `Aberta: ${trailRow.title}`;
   }
@@ -236,8 +412,22 @@ async function loadMessages() {
       return;
     }
 
-    // abre automaticamente a mais recente
     await openTrail(rows[0].id);
+  }
+
+  async function refreshTrailState() {
+    if (!currentTrail) return;
+
+    const { data: updatedTrail } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,content,created_at,current_quest,current_step")
+      .eq("id", currentTrail.id)
+      .single();
+
+    if (updatedTrail) {
+      currentTrail = updatedTrail;
+      renderHeader(updatedTrail);
+    }
   }
 
   async function sendMessage(text) {
@@ -252,29 +442,16 @@ async function loadMessages() {
     });
 
     sendBtn.disabled = false;
-    chatStatus.textContent = "";
 
     if (error) {
       chatStatus.textContent = "Erro ao enviar mensagem.";
       return;
     }
 
+    chatStatus.textContent = "";
     inputEl.value = "";
 
-    // ✅ NOVO: Recarrega trail para atualizar Quest/Desafio no topo
-    const { data: updatedTrail } = await window.supabaseClient
-      .from("trails")
-      .select("id,title,content,created_at,current_quest,current_step")
-      .eq("id", currentTrail.id)
-      .single();
-
-    if (updatedTrail) {
-      currentTrail = updatedTrail;
-      renderTrailInfo(updatedTrail);
-      questLabel.textContent = `Quest ${updatedTrail.current_quest ?? 1}`;
-      stepLabel.textContent = `Desafio ${updatedTrail.current_step ?? 1}`;
-    }
-
+    await refreshTrailState();
     await loadMessages();
   }
 
@@ -330,7 +507,6 @@ async function loadMessages() {
     await openTrail(id);
   });
 
-  // init
   await loadTrailsList();
 
 })();
