@@ -1,0 +1,225 @@
+/* app.css — EduLegal (chat/admin)
+   Não altera o login (style.css). */
+
+:root{
+  --bg: #201b2c;
+  --card: #2f2841;
+  --input: #514869;
+  --text: #f0ffffde;
+  --muted: #f0ffff94;
+  --brand: #00ff88;
+  --brand-soft: #77ffc0;
+  --shadow: 0px 10px 40px #00000056;
+  --shadow-brand: 0px 10px 40px -12px #00ff8052;
+  --radius: 20px;
+}
+
+body{
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Container grande e centralizado (alvo 1920 x 990) */
+.chat-shell{
+  width: min(1920px, calc(100vw - 48px));
+  height: min(990px, calc(100vh - 48px));
+  margin: 24px auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Topbar (seletor de mentoria) */
+.chat-topbar{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #00000056;
+  background: var(--card);
+}
+
+.chat-topbar label{
+  font-weight: 700;
+  color: var(--text);
+}
+
+.chat-topbar select{
+  width: min(680px, 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 14pt;
+  box-shadow: var(--shadow);
+  outline: none;
+}
+
+.status{
+  font-size: 12pt;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+/* Header fixo do chat */
+.chat-header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 18px 20px 14px;
+  background: var(--card);
+  border-bottom: 1px solid #00000056;
+}
+
+.mentoria-title{
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand);
+  margin: 0 0 6px 0;
+  letter-spacing: .3px;
+}
+
+.quest-line{
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: var(--brand-soft);
+}
+
+.step-line{
+  font-size: 16px;
+  margin: 0;
+  color: var(--text);
+  opacity: .95;
+}
+
+/* Área principal */
+.chat-main{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* permite scroll */
+}
+
+/* Mensagens */
+.messages{
+  flex: 1;
+  overflow: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bubble{
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: rgba(81, 72, 105, 0.35);
+  border: 1px solid #00000056;
+  font-size: 15.5pt;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.bubble.student{
+  border-color: rgba(0, 255, 136, 0.35);
+}
+
+.bubble.assistant{
+  border-color: rgba(119, 255, 192, 0.25);
+}
+
+.bubble b{
+  color: var(--brand-soft);
+}
+
+/* Composer */
+.composer{
+  padding: 14px 20px 18px;
+  border-top: 1px solid #00000056;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.composer textarea{
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 15pt;
+  box-shadow: var(--shadow);
+  outline: none;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.composer-row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.composer input[type="file"]{
+  color: var(--muted);
+}
+
+.hint{
+  margin: 0;
+  font-size: 11pt;
+  color: var(--muted);
+}
+
+/* Botões */
+.btn{
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  background: var(--brand);
+  color: #2b134b;
+  box-shadow: var(--shadow-brand);
+  white-space: nowrap;
+}
+
+.btn.secondary{
+  background: var(--input);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+.footer-row{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Responsivo */
+@media (max-width: 900px){
+  .chat-shell{
+    width: calc(100vw - 18px);
+    height: calc(100vh - 18px);
+    margin: 9px auto;
+    border-radius: 14px;
+  }
+  .chat-topbar{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .status{
+    margin-left: 0;
+  }
+}
