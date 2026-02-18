@@ -223,3 +223,60 @@ body{
     margin-left: 0;
   }
 }
+
+
+
+
+/* ===== Admin (Painel do Professor) ===== */
+
+.admin-shell{
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.admin-card{
+  width: min(900px, 96vw);
+  background: var(--card);
+  padding: 30px 35px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-card h1{
+  color: var(--brand);
+  font-weight: 800;
+  margin: 0 0 6px 0;
+}
+
+.admin-card label{
+  color: var(--text);
+  font-weight: 700;
+}
+
+.admin-card textarea,
+.admin-card input,
+.admin-card select{
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 14pt;
+  box-shadow: var(--shadow);
+  outline: none;
+}
+
+.admin-card textarea{
+  resize: vertical;
+  min-height: 140px;
+}
+
