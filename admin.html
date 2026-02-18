@@ -5,24 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EduLegal - Painel do Professor</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
 </head>
 
 <body>
 
-<h1>Painel do Professor 🎓</h1>
+<div class="admin-shell">
+  <div class="admin-card">
 
-<div style="max-width:600px; display:flex; flex-direction:column; gap:12px;">
+    <h1>Painel do Professor 🎓</h1>
 
-  <label>Selecionar aluno:</label>
-  <select id="studentSelect"></select>
+    <label>Selecionar aluno:</label>
+    <select id="studentSelect"></select>
 
-  <label>Objetivo / Brief da aula:</label>
-  <textarea id="teacherBrief" rows="6" placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
+    <label>Objetivo / Brief da aula:</label>
+    <textarea id="teacherBrief" rows="6"
+      placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
 
-  <button id="generateBtn">Gerar Mentoria</button>
+    <button id="generateBtn" class="btn">Gerar Mentoria</button>
 
-  <p id="status"></p>
+    <p id="status" class="status"></p>
 
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -122,7 +126,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
       return;
     }
 
-    // Se a função retornar um ok:false dentro de data
     if (data && data.ok === false) {
       console.error("generate-trail returned ok:false:", data);
       statusEl.textContent = "Erro: " + (data.details || data.error || "falha ao gerar mentoria");
