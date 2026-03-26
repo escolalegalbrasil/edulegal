@@ -235,6 +235,7 @@
     font-size: 18px;
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
       Helvetica, Arial, sans-serif;
+    scroll-margin-top: 18px;
   }
 
   .bubble.student {
@@ -456,6 +457,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   function scrollKeepingLastStudentVisible() {
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const studentBubbles = messagesEl.querySelectorAll(".bubble.student");
       const lastStudent = studentBubbles[studentBubbles.length - 1];
@@ -465,11 +467,13 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         return;
       }
 
-      const topMargin = 16;
-      const targetTop = Math.max(0, lastStudent.offsetTop - topMargin);
-      messagesEl.scrollTop = targetTop;
+      lastStudent.scrollIntoView({
+        block: "start",
+        behavior: "auto"
+      });
     });
-  }
+  });
+}
 
   function renderHeader(trailRow) {
     mentoriaTitleBox.textContent = trailRow.title || "Mentoria";
