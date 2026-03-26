@@ -13,192 +13,193 @@
     color: #f0ffffde;
   }
 
-  .chat-shell {
-    width: min(1920px, calc(100vw - 48px));
-    height: min(990px, calc(100vh - 48px));
-    margin: 24px auto;
+  .admin-shell {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  .admin-card {
+    width: 100%;
+    max-width: 1100px;
     background: #2f2841;
     border-radius: 20px;
     box-shadow: 0px 10px 40px #00000056;
-    overflow: hidden;
+    padding: 32px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    gap: 16px;
   }
 
-  .chat-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 18px 20px 14px;
-    background: #2f2841;
-    border-bottom: 1px solid #00000056;
-  }
-
-  .chat-header .mentoria-title {
-    font-size: 22px;
-    font-weight: 800;
+  .admin-card h1 {
+    margin: 0 0 4px 0;
     color: #00ff88;
-    margin: 0 0 6px 0;
-    letter-spacing: 0.3px;
   }
 
-  .chat-header .mentoria-subtitle {
-    font-size: 16px;
-    margin: 0;
-    color: #f0ffffde;
-    opacity: 0.95;
-  }
-
-  .chat-topbar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 14px 20px;
-    border-bottom: 1px solid #00000056;
-    background: #2f2841;
-  }
-
-  .chat-topbar label {
+  .admin-card label {
     font-weight: 700;
     color: #f0ffffde;
-    margin-right: 8px;
+    margin-top: 6px;
   }
 
-  .chat-topbar select {
-    width: min(680px, 100%);
+  #trailSelect,
+  #mentoriaTitleBox,
+  #chatInput {
+    width: 100%;
     border: none;
     border-radius: 10px;
-    padding: 12px 14px;
+    padding: 15px;
     background: #514869;
     color: #f0ffffde;
-    font-size: 14pt;
+    font-size: 12pt;
     box-shadow: 0px 10px 40px #00000056;
+    box-sizing: border-box;
     outline: none;
+  }
+
+  #mentoriaTitleBox {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 14pt;
+  }
+
+  .chat-box {
+    width: 100%;
+    min-height: 420px;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    background: #514869;
+    color: #f0ffffde;
+    font-size: 12pt;
+    box-shadow: 0px 10px 40px #00000056;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+  }
+
+  .bubble {
+    padding: 12px 14px;
+    border-radius: 12px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .bubble.student {
+    background: rgba(0, 255, 136, 0.14);
+    border: 1px solid rgba(0, 255, 136, 0.25);
+  }
+
+  .bubble.assistant {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .bubble b {
+    color: #00ff88;
+  }
+
+  .composer-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  #chatInput {
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  .actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
 
   .btn {
     border: none;
     border-radius: 10px;
-    padding: 12px 14px;
+    padding: 14px 18px;
+    text-transform: uppercase;
     font-weight: 800;
     letter-spacing: 1px;
-    cursor: pointer;
-    background: #00ff88;
     color: #2b134b;
+    background: #00ff88;
+    cursor: pointer;
     box-shadow: 0px 10px 40px -12px #00ff8052;
-    white-space: nowrap;
   }
 
   .btn.secondary {
-    background: #514869;
-    color: #f0ffffde;
-    box-shadow: 0px 10px 40px #00000056;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    background: #6b5f88;
+    color: #fff;
+    box-shadow: none;
   }
 
   .status {
-    font-size: 12pt;
-    color: #f0ffff94;
-    margin-left: auto;
-  }
-
-  .chat-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .messages {
-    flex: 1;
-    overflow: auto;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .bubble {
-    padding: 12px 12px;
-    border-radius: 12px;
-    background: rgba(81, 72, 105, 0.35);
-    border: 1px solid #00000056;
-    font-size: 15.5pt;
-    line-height: 1.35;
-    white-space: pre-wrap;
-  }
-
-  .bubble.student {
-    border-color: rgba(0, 255, 136, 0.35);
-  }
-
-  .bubble.assistant {
-    border-color: rgba(119, 255, 192, 0.25);
-  }
-
-  .bubble b {
-    color: #77ffc0;
-  }
-
-  .composer {
-    padding: 14px 20px 18px;
-    border-top: 1px solid #00000056;
-    background: #2f2841;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .composer textarea {
-    width: 100%;
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
-    background: #514869;
-    color: #f0ffffde;
-    font-size: 15pt;
-    box-shadow: 0px 10px 40px #00000056;
-    outline: none;
-    resize: vertical;
-    min-height: 70px;
-  }
-
-  .composer-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .composer input[type="file"] {
-    color: #f0ffff94;
-  }
-
-  .footer-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logout {
     margin: 0;
+    color: #f0ffffde;
+    font-size: 11pt;
   }
 
-  @media (max-width: 900px) {
-    .chat-shell {
-      width: calc(100vw - 18px);
-      height: calc(100vh - 18px);
-      margin: 9px auto;
-      border-radius: 14px;
+  .top-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .top-row .btn {
+    flex-shrink: 0;
+  }
+
+  input[type="file"] {
+    color: #f0ffffde;
+  }
+
+  .subtitle {
+    margin: -4px 0 6px 0;
+    color: #f0ffffb5;
+    font-size: 11pt;
+  }
+
+  @media (max-width: 768px) {
+    .admin-card {
+      padding: 20px;
     }
-    .chat-topbar {
+
+    .top-row {
       flex-direction: column;
       align-items: stretch;
     }
-    .status {
-      margin-left: 0;
+
+    .actions-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn {
+      width: 100%;
     }
   }
 </style>
@@ -206,40 +207,41 @@
 
 <body>
 
-<div class="chat-shell">
+<div class="admin-shell">
+  <div class="admin-card">
 
-  <div class="chat-topbar">
-    <div style="display:flex; gap:10px; align-items:center; width:100%; flex-wrap:wrap;">
-      <label><b>Mentoria:</b></label>
+    <h1>Mentoria do Aluno</h1>
+
+    <label>Selecionar mentoria:</label>
+    <div class="top-row">
       <select id="trailSelect"></select>
       <button id="openTrailBtn" class="btn">Abrir</button>
-      <p id="trailStatus" class="status"></p>
+      <button class="btn secondary" onclick="logout()">Sair</button>
     </div>
-  </div>
 
-  <div class="chat-header">
-    <p id="mentoriaTitle" class="mentoria-title">Mentoria</p>
-    <p id="mentoriaSubtitle" class="mentoria-subtitle"></p>
-  </div>
+    <p id="trailStatus" class="status"></p>
 
-  <div class="chat-main">
-    <div id="messages" class="messages"></div>
+    <label>Título da mentoria:</label>
+    <div id="mentoriaTitleBox">Mentoria</div>
 
-    <div class="composer">
-      <textarea id="chatInput" rows="3" placeholder="Escreva aqui..."></textarea>
+    <p id="mentoriaSubtitle" class="subtitle"></p>
 
-      <div class="composer-row">
-        <input type="file" id="fileInput" accept="image/*" />
-        <button id="uploadBtn" class="btn secondary">Enviar print</button>
-        <button id="sendBtn" class="btn">Enviar</button>
-        <span id="chatStatus" class="status"></span>
-      </div>
+    <label>Conversa:</label>
+    <div class="chat-box">
+      <div id="messages" class="messages"></div>
 
-      <div class="footer-row">
-        <span class="hint">Dica: Shift+Enter quebra linha.</span>
-        <button class="btn secondary logout" onclick="logout()">Sair</button>
+      <div class="composer-area">
+        <textarea id="chatInput" rows="4" placeholder="Escreva aqui..."></textarea>
+
+        <div class="actions-row">
+          <input type="file" id="fileInput" accept="image/*" />
+          <button id="uploadBtn" class="btn secondary">Enviar print</button>
+          <button id="sendBtn" class="btn">Enviar</button>
+          <span id="chatStatus" class="status"></span>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -272,7 +274,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const fileInput = document.getElementById("fileInput");
   const chatStatus = document.getElementById("chatStatus");
 
-  const mentoriaTitleEl = document.getElementById("mentoriaTitle");
+  const mentoriaTitleBox = document.getElementById("mentoriaTitleBox");
   const mentoriaSubtitleEl = document.getElementById("mentoriaSubtitle");
 
   let currentTrail = null;
@@ -286,6 +288,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         content.objetivo_minimo ||
         content.objetivoMinimo ||
         content.objetivo ||
+        content.briefing ||
         ""
       );
     }
@@ -299,7 +302,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   function renderHeader(trailRow) {
-    mentoriaTitleEl.textContent = trailRow.title || "Mentoria";
+    mentoriaTitleBox.textContent = trailRow.title || "Mentoria";
 
     const objective = extractObjective(trailRow.content);
     mentoriaSubtitleEl.textContent = objective || "";
@@ -382,6 +385,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     }
 
     trailSelect.innerHTML = "";
+
     (rows || []).forEach((t) => {
       const opt = document.createElement("option");
       const dateTxt = t.created_at ? new Date(t.created_at).toLocaleString() : "";
@@ -491,7 +495,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   });
 
   await loadTrailsList();
-
 })();
 
 async function logout() {
