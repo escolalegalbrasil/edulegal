@@ -51,7 +51,8 @@
   .chat-card {
     width: 100%;
     max-width: 1120px;
-    min-height: 88vh;
+    height: 88vh;
+    max-height: 88vh;
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     background-color: var(--card);
     border: 1px solid var(--line);
@@ -65,6 +66,7 @@
   .chat-top {
     padding: 28px 30px 22px;
     border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
   }
 
   .chat-top h1 {
@@ -155,6 +157,7 @@
 
   .mentoria-meta {
     padding: 20px 30px 0;
+    flex-shrink: 0;
   }
 
   .mentoria-title-box {
@@ -193,18 +196,20 @@
     border-radius: 22px;
     padding: 18px;
     min-height: 0;
+    overflow: hidden;
   }
 
   .messages {
     flex: 1;
-    min-height: 470px;
-    max-height: 580px;
+    min-height: 0;
     overflow-y: auto;
-    padding: 18px 6px 18px 6px;
+    overflow-x: hidden;
+    padding: 18px 6px;
     display: flex;
     flex-direction: column;
     gap: 14px;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
 
   .messages::-webkit-scrollbar {
@@ -253,6 +258,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex-shrink: 0;
   }
 
   textarea {
@@ -296,6 +302,7 @@
     border-top: 1px solid var(--line);
     display: flex;
     justify-content: flex-end;
+    flex-shrink: 0;
   }
 
   @media (max-width: 900px) {
@@ -304,7 +311,8 @@
     }
 
     .chat-card {
-      min-height: 94vh;
+      height: 94vh;
+      max-height: 94vh;
       border-radius: 22px;
     }
 
@@ -313,11 +321,6 @@
     .chat-main {
       padding-left: 18px;
       padding-right: 18px;
-    }
-
-    .messages {
-      min-height: 380px;
-      max-height: none;
     }
 
     .bubble {
@@ -446,26 +449,25 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     return "";
   }
 
-  function scrollMessagesToLatestStudent() {
+  function scrollMessagesToBottom() {
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+
+  function scrollKeepingLastStudentVisible() {
     requestAnimationFrame(() => {
       const studentBubbles = messagesEl.querySelectorAll(".bubble.student");
       const lastStudent = studentBubbles[studentBubbles.length - 1];
 
       if (!lastStudent) {
-        messagesEl.scrollTo({
-          top: messagesEl.scrollHeight,
-          behavior: "smooth"
-        });
+        messagesEl.scrollTop = messagesEl.scrollHeight;
         return;
       }
 
-      const marginTop = 20;
-      const targetTop = lastStudent.offsetTop - marginTop;
-
-      messagesEl.scrollTo({
-        top: Math.max(0, targetTop),
-        behavior: "smooth"
-      });
+      const topMargin = 16;
+      const targetTop = Math.max(0, lastStudent.offsetTop - topMargin);
+      messagesEl.scrollTop = targetTop;
     });
   }
 
@@ -501,8 +503,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
       messagesEl.appendChild(bubble);
     }
-
-    scrollMessagesToLatestStudent();
   }
 
   async function loadMessages() {
@@ -535,6 +535,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     currentTrail = trailRow;
     renderHeader(trailRow);
     await loadMessages();
+    scrollMessagesToBottom();
     trailStatus.textContent = `Aberta: ${trailRow.title}`;
   }
 
@@ -609,7 +610,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     await refreshTrailState();
     await loadMessages();
-    scrollMessagesToLatestStudent();
+    scrollKeepingLastStudentVisible();
   }
 
   sendBtn.addEventListener("click", () => {
