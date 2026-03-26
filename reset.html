@@ -1,13 +1,67 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Redefinir senha</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1b2e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #2a2540;
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 380px;
+      box-sizing: border-box;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    input {
+      background: #fff;
+      color: #000;
+    }
+    button {
+      background: #00ff88;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .msg {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #ddd;
+      white-space: pre-line;
+    }
+  </style>
 </head>
 <body>
-  <h1>Nova senha</h1>
-  <input type="password" id="novaSenha" placeholder="Digite a nova senha">
-  <button id="btnSalvar">Salvar nova senha</button>
+  <div class="box">
+    <h1>Nova senha</h1>
+    <input type="password" id="novaSenha" placeholder="Digite a nova senha" />
+    <input type="password" id="confirmarSenha" placeholder="Confirme a nova senha" />
+    <button id="btnSalvar">Salvar nova senha</button>
+    <div class="msg" id="msg"></div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -15,24 +69,79 @@
     const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("btnSalvar").addEventListener("click", async () => {
-      const novaSenha = document.getElementById("novaSenha").value.trim();
+    const btnSalvar = document.getElementById("btnSalvar");
+    const novaSenhaEl = document.getElementById("novaSenha");
+    const confirmarSenhaEl = document.getElementById("confirmarSenha");
+    const msgEl = document.getElementById("msg");
 
-      if (!novaSenha) {
-        alert("Digite a nova senha.");
+    function setMsg(text) {
+      msgEl.textContent = text;
+    }
+
+    async function prepareRecoverySession() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+      const type = params.get("type");
+
+      if (!access_token || !refresh_token || type !== "recovery") {
+        setMsg("Link inválido ou incompleto.");
+        return false;
+      }
+
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token
+      });
+
+      if (error) {
+        setMsg("Erro ao validar link de recuperação: " + error.message);
+        return false;
+      }
+
+      return true;
+    }
+
+    btnSalvar.addEventListener("click", async () => {
+      const novaSenha = novaSenhaEl.value.trim();
+      const confirmarSenha = confirmarSenhaEl.value.trim();
+
+      if (!novaSenha || !confirmarSenha) {
+        setMsg("Preencha os dois campos.");
         return;
       }
+
+      if (novaSenha !== confirmarSenha) {
+        setMsg("As senhas não coincidem.");
+        return;
+      }
+
+      if (novaSenha.length < 6) {
+        setMsg("Use pelo menos 6 caracteres.");
+        return;
+      }
+
+      setMsg("Salvando nova senha...");
+
+      const ok = await prepareRecoverySession();
+      if (!ok) return;
 
       const { error } = await supabase.auth.updateUser({
         password: novaSenha
       });
 
       if (error) {
-        alert("Erro ao redefinir senha: " + error.message);
-      } else {
-        alert("Senha redefinida com sucesso!");
-        window.location.href = "index.html";
+        setMsg("Erro ao redefinir senha: " + error.message);
+        return;
       }
+
+      setMsg("Senha redefinida com sucesso! Redirecionando...");
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1500);
     });
   </script>
 </body>
