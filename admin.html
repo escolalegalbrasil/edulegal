@@ -18,6 +18,13 @@
     <label>Selecionar aluno:</label>
     <select id="studentSelect"></select>
 
+    <label>Título da mentoria:</label>
+    <input
+      id="mentoriaTitle"
+      type="text"
+      placeholder="Ex: Boas-vindas no jogo"
+    />
+
     <label>Objetivo / Brief da aula:</label>
     <textarea id="teacherBrief" rows="6"
       placeholder="Descreva a trilha, objetivos e critérios..."></textarea>
@@ -50,7 +57,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   const userId = session.user.id;
 
-  // ✅ Verifica se é professor (tabela teachers)
   const { data: teacher, error: teacherErr } = await window.supabaseClient
     .from("teachers")
     .select("id")
@@ -68,11 +74,11 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   const studentSelect = document.getElementById("studentSelect");
+  const mentoriaTitleEl = document.getElementById("mentoriaTitle");
   const generateBtn = document.getElementById("generateBtn");
   const teacherBriefEl = document.getElementById("teacherBrief");
   const statusEl = document.getElementById("status");
 
-  // ✅ Carregar alunos
   const { data: students, error: studentsErr } = await window.supabaseClient
     .from("students")
     .select("id,name")
@@ -97,12 +103,12 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   generateBtn.addEventListener("click", async () => {
-
     const studentId = studentSelect.value;
+    const title = mentoriaTitleEl.value.trim();
     const teacherBrief = teacherBriefEl.value.trim();
 
-    if (!studentId || !teacherBrief) {
-      statusEl.textContent = "Preencha os campos.";
+    if (!studentId || !title || !teacherBrief) {
+      statusEl.textContent = "Preencha aluno, título e brief.";
       return;
     }
 
@@ -112,6 +118,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     const { data, error } = await window.supabaseClient.functions.invoke("generate-trail", {
       body: {
         student_id: studentId,
+        title,
         teacher_brief: teacherBrief
       }
     });
@@ -133,6 +140,8 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     }
 
     statusEl.textContent = "Mentoria criada com sucesso!";
+    mentoriaTitleEl.value = "";
+    teacherBriefEl.value = "";
   });
 
 })();
