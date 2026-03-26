@@ -580,7 +580,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     sendBtn.disabled = true;
     chatStatus.textContent = "Enviando...";
 
-    const { error } = await window.supabaseClient.functions.invoke("edulegal-chat", {
+    const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
       body: { trail_id: currentTrail.id, message: text }
     });
 
