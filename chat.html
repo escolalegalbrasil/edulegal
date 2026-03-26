@@ -422,26 +422,25 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   let currentTrail = null;
 
   function extractObjective(content) {
-    if (!content) return "";
+  if (!content) return "";
 
-    if (typeof content === "object") {
-      return (
-        content["Objetivo mínimo"] ||
-        content.objetivo_minimo ||
-        content.objetivoMinimo ||
-        content.objetivo ||
-        content.briefing ||
-        ""
-      );
-    }
-
-    if (typeof content === "string") {
-      const match = content.match(/Objetivo mínimo:\s*(.+)/i);
-      return match ? match[1].trim() : "";
-    }
-
-    return "";
+  if (typeof content === "object") {
+    return (
+      content["Objetivo mínimo"] ||
+      content.objetivo_minimo ||
+      content.objetivoMinimo ||
+      content.objetivo ||
+      ""
+    );
   }
+
+  if (typeof content === "string") {
+    const match = content.match(/Objetivo mínimo:\s*(.+)/i);
+    return match ? match[1].trim() : "";
+  }
+
+  return "";
+}
 
   function scrollMessagesToBottom() {
     requestAnimationFrame(() => {
