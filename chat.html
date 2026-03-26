@@ -196,16 +196,17 @@
   }
 
   .messages {
-    flex: 1;
-    min-height: 470px;
-    max-height: 580px;
-    overflow-y: auto;
-    padding-right: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    scroll-behavior: smooth;
-  }
+  flex: 1;
+  min-height: 470px;
+  max-height: 580px;
+  overflow-y: auto;
+  padding: 18px 6px 18px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+  justify-content: flex-end;
+}
 
   .messages::-webkit-scrollbar {
     width: 10px;
@@ -449,10 +450,13 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   function scrollMessagesToBottom() {
-    requestAnimationFrame(() => {
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+  requestAnimationFrame(() => {
+    messagesEl.scrollTo({
+      top: messagesEl.scrollHeight,
+      behavior: "smooth"
     });
-  }
+  });
+}
 
   function renderHeader(trailRow) {
     mentoriaTitleBox.textContent = trailRow.title || "Mentoria";
@@ -591,6 +595,8 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     chatStatus.textContent = "";
     inputEl.value = "";
+
+    scrollMessagesToBottom();
 
     await refreshTrailState();
     await loadMessages();
