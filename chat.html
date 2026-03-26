@@ -6,7 +6,665 @@
 <title>EduLegal - Chat</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="app.css">
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduLegal - Chat</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="app.css">
 
+
+<h1>Mentoria do Aluno TESTE NOVO</h1>
+
+  
+<style>
+  :root {
+    --bg: #16131d;
+    --card: #1d1926;
+    --card-2: #221d2d;
+    --surface: #2a2437;
+    --surface-2: #312b41;
+    --line: rgba(255, 255, 255, 0.06);
+    --text: #f4f1fb;
+    --muted: #b4adc5;
+    --accent: #89f3c5;
+    --accent-soft: rgba(137, 243, 197, 0.10);
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    --radius-xl: 28px;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(137,243,197,0.05), transparent 22%),
+      radial-gradient(circle at bottom right, rgba(255,255,255,0.03), transparent 20%),
+      linear-gradient(180deg, #14111a 0%, #16131d 100%);
+  }
+
+  .page {
+    min-height: 100vh;
+    padding: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .chat-card {
+    width: 100%;
+    max-width: 1120px;
+    min-height: 88vh;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    background-color: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-top {
+    padding: 28px 30px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chat-top h1 {
+    margin: 0 0 18px;
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: var(--text);
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .top-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  select,
+  textarea,
+  .mentoria-title-box {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: 0.2s ease;
+  }
+
+  select:focus,
+  textarea:focus {
+    border-color: rgba(137, 243, 197, 0.25);
+    box-shadow: 0 0 0 3px rgba(137, 243, 197, 0.06);
+  }
+
+  select {
+    flex: 1;
+    min-width: 260px;
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #132019;
+  }
+
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .status {
+    margin: 10px 0 0;
+    min-height: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .mentoria-meta {
+    padding: 20px 30px 0;
+  }
+
+  .mentoria-title-box {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 16px 18px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid var(--line);
+  }
+
+  .mentoria-subtitle {
+    margin: 10px 2px 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 30px 30px;
+    min-height: 0;
+  }
+
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 18px;
+    min-height: 0;
+  }
+
+  .messages {
+    flex: 1;
+    min-height: 470px;
+    max-height: 580px;
+    overflow-y: auto;
+    padding-right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .messages::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .messages::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+  }
+
+  .bubble {
+    max-width: 82%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 15px;
+  }
+
+  .bubble.student {
+    align-self: flex-end;
+    background: rgba(137, 243, 197, 0.08);
+    border: 1px solid rgba(137, 243, 197, 0.12);
+  }
+
+  .bubble.assistant {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .bubble b {
+    color: var(--accent);
+  }
+
+  .composer {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+    max-height: 240px;
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .composer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  input[type="file"] {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .composer-status {
+    min-height: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .footer-note {
+    font-size: 12px;
+    color: rgba(244, 241, 251, 0.52);
+    margin-top: 2px;
+  }
+
+  .bottom-bar {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  @media (max-width: 900px) {
+    .page {
+      padding: 14px;
+    }
+
+    .chat-card {
+      min-height: 94vh;
+      border-radius: 22px;
+    }
+
+    .chat-top,
+    .mentoria-meta,
+    .chat-main {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .messages {
+      min-height: 380px;
+      max-height: none;
+    }
+
+    .bubble {
+      max-width: 100%;
+    }
+
+    .top-controls,
+    .composer-row,
+    .bottom-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn {
+      width: 100%;
+    }
+
+    .bottom-bar {
+      justify-content: stretch;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="page">
+  <div class="chat-card">
+
+    <div class="chat-top">
+      <h1>Mentoria do Aluno</h1>
+
+      <label class="label">Selecionar mentoria:</label>
+      <div class="top-controls">
+        <select id="trailSelect"></select>
+        <button id="openTrailBtn" class="btn btn-primary">Abrir</button>
+      </div>
+
+      <p id="trailStatus" class="status"></p>
+    </div>
+
+    <div class="mentoria-meta">
+      <label class="label">Título da mentoria:</label>
+      <div id="mentoriaTitleBox" class="mentoria-title-box">Mentoria</div>
+      <p id="mentoriaSubtitle" class="mentoria-subtitle"></p>
+    </div>
+
+    <div class="chat-main">
+      <div class="chat-panel">
+        <div id="messages" class="messages"></div>
+
+        <div class="composer">
+          <textarea id="chatInput" rows="4" placeholder="Escreva aqui..."></textarea>
+
+          <div class="composer-row">
+            <input type="file" id="fileInput" accept="image/*" />
+            <button id="uploadBtn" class="btn btn-secondary">Enviar print</button>
+            <button id="sendBtn" class="btn btn-primary">Enviar</button>
+          </div>
+
+          <div id="chatStatus" class="composer-status"></div>
+          <div class="footer-note">Shift + Enter quebra linha.</div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="btn btn-secondary" onclick="logout()">Sair</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "https://xhasvagsodoctsqbfwkw.supabase.co";
+const supabaseKey = "sb_publishable_xkkU9fI3Gv9dpEf7kadVBw_9GrcLZzr";
+window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+</script>
+
+<script>
+(async function init() {
+  const { data: sessionData } = await window.supabaseClient.auth.getSession();
+  const session = sessionData?.session;
+
+  if (!session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const trailSelect = document.getElementById("trailSelect");
+  const openTrailBtn = document.getElementById("openTrailBtn");
+  const trailStatus = document.getElementById("trailStatus");
+
+  const messagesEl = document.getElementById("messages");
+  const inputEl = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const fileInput = document.getElementById("fileInput");
+  const chatStatus = document.getElementById("chatStatus");
+
+  const mentoriaTitleBox = document.getElementById("mentoriaTitleBox");
+  const mentoriaSubtitleEl = document.getElementById("mentoriaSubtitle");
+
+  let currentTrail = null;
+
+  function extractObjective(content) {
+  if (!content) return "";
+
+  if (typeof content === "object") {
+    return (
+      content["Objetivo mínimo"] ||
+      content.objetivo_minimo ||
+      content.objetivoMinimo ||
+      content.objetivo ||
+      ""
+    );
+  }
+
+  if (typeof content === "string") {
+    const match = content.match(/Objetivo mínimo:\s*(.+)/i);
+    return match ? match[1].trim() : "";
+  }
+
+  return "";
+}
+
+  function scrollMessagesToBottom() {
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+
+  function renderHeader(trailRow) {
+    mentoriaTitleBox.textContent = trailRow.title || "Mentoria";
+
+    const objective = extractObjective(trailRow.content);
+    mentoriaSubtitleEl.textContent = objective || "";
+  }
+
+  function renderMessages(rows) {
+    messagesEl.innerHTML = "";
+
+    for (const m of rows) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${m.role === "student" ? "student" : "assistant"}`;
+
+      const content = m.content || "";
+      const urlMatch = content.match(/https?:\/\/[^\s]+/);
+
+      if (urlMatch && urlMatch[0].includes("/storage/v1/object/sign/evidence/")) {
+        const img = document.createElement("img");
+        img.src = urlMatch[0];
+        img.style.maxWidth = "100%";
+        img.style.marginTop = "10px";
+        img.style.borderRadius = "12px";
+
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
+        bubble.appendChild(img);
+      } else {
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
+      }
+
+      messagesEl.appendChild(bubble);
+    }
+
+    scrollMessagesToBottom();
+  }
+
+  async function loadMessages() {
+    if (!currentTrail) return;
+
+    const { data: rows } = await window.supabaseClient
+      .from("messages")
+      .select("role,content,created_at")
+      .eq("trail_id", currentTrail.id)
+      .order("created_at", { ascending: true });
+
+    renderMessages(rows || []);
+  }
+
+  async function openTrail(trailId) {
+    trailStatus.textContent = "Carregando mentoria...";
+    chatStatus.textContent = "";
+
+    const { data: trailRow, error } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,content,created_at")
+      .eq("id", trailId)
+      .single();
+
+    if (error || !trailRow) {
+      trailStatus.textContent = "Erro ao carregar mentoria.";
+      return;
+    }
+
+    currentTrail = trailRow;
+    renderHeader(trailRow);
+    await loadMessages();
+    trailStatus.textContent = `Aberta: ${trailRow.title}`;
+  }
+
+  async function loadTrailsList() {
+    trailStatus.textContent = "Carregando lista de mentorias...";
+
+    const { data: rows, error } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      trailStatus.textContent = "Erro ao carregar mentorias.";
+      return;
+    }
+
+    trailSelect.innerHTML = "";
+
+    (rows || []).forEach((t) => {
+      const opt = document.createElement("option");
+      const dateTxt = t.created_at ? new Date(t.created_at).toLocaleString() : "";
+      opt.value = t.id;
+      opt.textContent = `${t.title || "Mentoria"}${dateTxt ? " — " + dateTxt : ""}`;
+      trailSelect.appendChild(opt);
+    });
+
+    if (!rows || rows.length === 0) {
+      trailStatus.textContent = "Nenhuma mentoria encontrada.";
+      return;
+    }
+
+    await openTrail(rows[0].id);
+  }
+
+  async function refreshTrailState() {
+    if (!currentTrail) return;
+
+    const { data: updatedTrail } = await window.supabaseClient
+      .from("trails")
+      .select("id,title,content,created_at")
+      .eq("id", currentTrail.id)
+      .single();
+
+    if (updatedTrail) {
+      currentTrail = updatedTrail;
+      renderHeader(updatedTrail);
+    }
+  }
+
+  async function sendMessage(text) {
+    if (!currentTrail) return;
+    if (!text) return;
+
+    sendBtn.disabled = true;
+    chatStatus.textContent = "Enviando...";
+
+    const { error } = await window.supabaseClient.functions.invoke("edulegal-chat", {
+      body: { trail_id: currentTrail.id, message: text }
+    });
+
+    sendBtn.disabled = false;
+
+    if (error) {
+      chatStatus.textContent = "Erro ao enviar mensagem.";
+      return;
+    }
+
+    chatStatus.textContent = "";
+    inputEl.value = "";
+
+    await refreshTrailState();
+    await loadMessages();
+    scrollMessagesToBottom();
+  }
+
+  sendBtn.addEventListener("click", () => {
+    sendMessage(inputEl.value.trim());
+  });
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputEl.value.trim());
+    }
+  });
+
+  uploadBtn.addEventListener("click", async () => {
+    if (!currentTrail) return;
+
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    uploadBtn.disabled = true;
+    chatStatus.textContent = "Enviando print...";
+
+    const userId = session.user.id;
+    const filePath = `${userId}/${currentTrail.id}/${Date.now()}_${file.name}`;
+
+    const { error: uploadError } = await window.supabaseClient.storage
+      .from("evidence")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      chatStatus.textContent = "Erro no upload.";
+      uploadBtn.disabled = false;
+      return;
+    }
+
+    const { data } = await window.supabaseClient.storage
+      .from("evidence")
+      .createSignedUrl(filePath, 3600);
+
+    const imageUrl = data.signedUrl;
+
+    await sendMessage(`EVIDÊNCIA_PRINT (analisar imagem): ${imageUrl}`);
+
+    fileInput.value = "";
+    uploadBtn.disabled = false;
+    chatStatus.textContent = "";
+  });
+
+  openTrailBtn.addEventListener("click", async () => {
+    const id = trailSelect.value;
+    if (!id) return;
+    await openTrail(id);
+  });
+
+  await loadTrailsList();
+})();
+
+async function logout() {
+  await window.supabaseClient.auth.signOut();
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
 <style>
   :root {
     --bg: #16131d;
