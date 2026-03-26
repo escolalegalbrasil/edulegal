@@ -7,15 +7,12 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="app.css">
 
-
 <style>
-  /* ===== Chat page (não altera seu style.css) ===== */
   body {
     background: #201b2c;
     color: #f0ffffde;
   }
 
-  /* Container grande e centralizado (alvo 1920 x 990) */
   .chat-shell {
     width: min(1920px, calc(100vw - 48px));
     height: min(990px, calc(100vh - 48px));
@@ -28,7 +25,6 @@
     flex-direction: column;
   }
 
-  /* Cabeçalho fixo */
   .chat-header {
     position: sticky;
     top: 0;
@@ -46,21 +42,13 @@
     letter-spacing: 0.3px;
   }
 
-  .chat-header .quest-line {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 4px 0;
-    color: #77ffc0;
-  }
-
-  .chat-header .step-line {
+  .chat-header .mentoria-subtitle {
     font-size: 16px;
     margin: 0;
     color: #f0ffffde;
     opacity: 0.95;
   }
 
-  /* Área superior (seletor) */
   .chat-topbar {
     display: flex;
     gap: 10px;
@@ -115,12 +103,11 @@
     margin-left: auto;
   }
 
-  /* Conteúdo principal: mensagens + composer */
   .chat-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* importante para scroll */
+    min-height: 0;
   }
 
   .messages {
@@ -199,7 +186,6 @@
     margin: 0;
   }
 
-  /* mobile/pequenas telas */
   @media (max-width: 900px) {
     .chat-shell {
       width: calc(100vw - 18px);
@@ -211,7 +197,9 @@
       flex-direction: column;
       align-items: stretch;
     }
-    .status { margin-left: 0; }
+    .status {
+      margin-left: 0;
+    }
   }
 </style>
 </head>
@@ -220,7 +208,6 @@
 
 <div class="chat-shell">
 
-  <!-- Topbar de seleção -->
   <div class="chat-topbar">
     <div style="display:flex; gap:10px; align-items:center; width:100%; flex-wrap:wrap;">
       <label><b>Mentoria:</b></label>
@@ -230,11 +217,9 @@
     </div>
   </div>
 
-  <!-- Cabeçalho fixo -->
   <div class="chat-header">
     <p id="mentoriaTitle" class="mentoria-title">Mentoria</p>
-    <p id="questLine" class="quest-line">Quest 1 — …</p>
-    <p id="stepLine" class="step-line">Desafio 1/1 — …</p>
+    <p id="mentoriaSubtitle" class="mentoria-subtitle"></p>
   </div>
 
   <div class="chat-main">
@@ -276,7 +261,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     return;
   }
 
-  // UI refs
   const trailSelect = document.getElementById("trailSelect");
   const openTrailBtn = document.getElementById("openTrailBtn");
   const trailStatus = document.getElementById("trailStatus");
@@ -288,39 +272,37 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const fileInput = document.getElementById("fileInput");
   const chatStatus = document.getElementById("chatStatus");
 
-  // Header refs
   const mentoriaTitleEl = document.getElementById("mentoriaTitle");
-  const questLineEl = document.getElementById("questLine");
-  const stepLineEl = document.getElementById("stepLine");
+  const mentoriaSubtitleEl = document.getElementById("mentoriaSubtitle");
 
   let currentTrail = null;
 
-  function getQuestAndStepTitles(trailRow) {
-    const content = trailRow.content || {};
-    const quests = Array.isArray(content.quests) ? content.quests : [];
+  function extractObjective(content) {
+    if (!content) return "";
 
-    const qNum = trailRow.current_quest ?? 1;
-    const sNum = trailRow.current_step ?? 1;
+    if (typeof content === "object") {
+      return (
+        content["Objetivo mínimo"] ||
+        content.objetivo_minimo ||
+        content.objetivoMinimo ||
+        content.objetivo ||
+        ""
+      );
+    }
 
-    const quest = quests[qNum - 1] || null;
+    if (typeof content === "string") {
+      const match = content.match(/Objetivo mínimo:\s*(.+)/i);
+      return match ? match[1].trim() : "";
+    }
 
-    // steps podem existir ou não
-    const steps = Array.isArray(quest?.steps) ? quest.steps : null;
-    const totalSteps = steps ? steps.length : 1;
-    const step = steps ? (steps[sNum - 1] || steps[steps.length - 1]) : null;
-
-    const questTitle = (quest?.title) ? quest.title : "Sem título";
-    const stepTitle = (step?.title) ? step.title : "Sem título";
-
-    return { qNum, sNum, totalSteps, questTitle, stepTitle };
+    return "";
   }
 
   function renderHeader(trailRow) {
-    const { qNum, sNum, totalSteps, questTitle, stepTitle } = getQuestAndStepTitles(trailRow);
-
     mentoriaTitleEl.textContent = trailRow.title || "Mentoria";
-    questLineEl.textContent = `Quest ${qNum} — ${questTitle}`;
-    stepLineEl.textContent = `Desafio ${sNum}/${totalSteps} — ${stepTitle}`;
+
+    const objective = extractObjective(trailRow.content);
+    mentoriaSubtitleEl.textContent = objective || "";
   }
 
   function renderMessages(rows) {
@@ -349,7 +331,6 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
       messagesEl.appendChild(bubble);
     }
 
-    // scroll para baixo
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
@@ -371,7 +352,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const { data: trailRow, error } = await window.supabaseClient
       .from("trails")
-      .select("id,title,content,created_at,current_quest,current_step")
+      .select("id,title,content,created_at")
       .eq("id", trailId)
       .single();
 
@@ -422,7 +403,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const { data: updatedTrail } = await window.supabaseClient
       .from("trails")
-      .select("id,title,content,created_at,current_quest,current_step")
+      .select("id,title,content,created_at")
       .eq("id", currentTrail.id)
       .single();
 
