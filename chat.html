@@ -504,44 +504,16 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   function removeThinkingBubble() {
-  const existing = messagesEl.querySelector(".bubble.thinking");
-  if (existing) existing.remove();
+  chatStatus.textContent = "";
 }
 
 function showThinkingBubble() {
-  removeThinkingBubble();
-
-  const bubble = document.createElement("div");
-  bubble.className = "bubble assistant thinking";
-  bubble.innerHTML = `
-    <b>IA:</b>
-    <span>Pensando</span>
+  chatStatus.innerHTML = `
+    IA pensando
     <span class="thinking-dots">
       <span></span><span></span><span></span>
     </span>
   `;
-
-  messagesEl.appendChild(bubble);
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const studentBubbles = messagesEl.querySelectorAll(".bubble.student");
-      const lastStudent = studentBubbles[studentBubbles.length - 1];
-
-      if (!lastStudent) {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-        return;
-      }
-
-      const topPadding = 18;
-      const extraSpaceForThinking = 46;
-
-      messagesEl.scrollTop = Math.max(
-        0,
-        lastStudent.offsetTop - topPadding + extraSpaceForThinking
-      );
-    });
-  });
 }
   function scrollKeepingLastStudentVisible() {
   requestAnimationFrame(() => {
@@ -686,7 +658,6 @@ function showThinkingBubble() {
   sendBtn.disabled = true;
   uploadBtn.disabled = true;
   inputEl.disabled = true;
-  chatStatus.textContent = "A IA está respondendo. Aguarde...";
   showThinkingBubble();
 
   try {
