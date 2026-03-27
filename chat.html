@@ -428,6 +428,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   const mentoriaSubtitleEl = document.getElementById("mentoriaSubtitle");
 
   let currentTrail = null;
+  let isSending = false;
 
   function extractObjective(content) {
     if (!content) return "";
@@ -591,23 +592,45 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   async function sendMessage(text) {
-    if (!currentTrail) return;
-    if (!text) return;
+  if (!currentTrail) return;
+  if (!text) return;
+  if (isSending) return;
 
-    sendBtn.disabled = true;
-    chatStatus.textContent = "Enviando...";
+  isSending = true;
+  sendBtn.disabled = true;
+  uploadBtn.disabled = true;
+  inputEl.disabled = true;
+ chatStatus.textContent = "A IA está respondendo. Aguarde...";
 
+  try {
     const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
       body: { trail_id: currentTrail.id, message: text }
     });
-
-    sendBtn.disabled = false;
 
     if (error) {
       console.error("Erro real ao enviar mensagem:", error);
       chatStatus.textContent = "Erro: " + (error.message || JSON.stringify(error));
       return;
     }
+
+    inputEl.value = "";
+
+    await refreshTrailState();
+    await loadMessages();
+    scrollMessagesToBottom();
+
+    chatStatus.textContent = "";
+  } catch (err) {
+    console.error("Erro inesperado ao enviar mensagem:", err);
+    chatStatus.textContent = "Erro ao enviar mensagem.";
+  } finally {
+    isSending = false;
+    sendBtn.disabled = false;
+    uploadBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+  }
+}
 
     chatStatus.textContent = "";
     inputEl.value = "";
@@ -622,13 +645,21 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   });
 
   inputEl.addEventListener("keydown", (e) => {
+  if (isSending) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(inputEl.value.trim());
     }
-  });
+    return;
+  }
+
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage(inputEl.value.trim());
+  }
+});
 
   uploadBtn.addEventListener("click", async () => {
+     if (isSending) return;
     if (!currentTrail) return;
 
     const file = fileInput.files[0];
