@@ -522,9 +522,27 @@ function showThinkingBubble() {
   `;
 
   messagesEl.appendChild(bubble);
-  scrollKeepingLastStudentVisible();
-}
 
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const studentBubbles = messagesEl.querySelectorAll(".bubble.student");
+      const lastStudent = studentBubbles[studentBubbles.length - 1];
+
+      if (!lastStudent) {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return;
+      }
+
+      const topPadding = 18;
+      const extraSpaceForThinking = 46;
+
+      messagesEl.scrollTop = Math.max(
+        0,
+        lastStudent.offsetTop - topPadding + extraSpaceForThinking
+      );
+    });
+  });
+}
   function scrollKeepingLastStudentVisible() {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
