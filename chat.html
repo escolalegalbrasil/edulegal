@@ -504,10 +504,14 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 
   function removeThinkingBubble() {
-  chatStatus.textContent = "";
+  if (chatStatus.dataset.state === "thinking") {
+    chatStatus.innerHTML = "";
+    delete chatStatus.dataset.state;
+  }
 }
 
 function showThinkingBubble() {
+  chatStatus.dataset.state = "thinking";
   chatStatus.innerHTML = `
     IA pensando
     <span class="thinking-dots">
@@ -667,7 +671,7 @@ function showThinkingBubble() {
 
     if (error) {
       console.error("Erro real ao enviar mensagem:", error);
-      removeThinkingBubble(); // AQUI: antes do return do erro
+      removeThinkingBubble();
       chatStatus.textContent = "Erro: " + (error.message || JSON.stringify(error));
       return;
     }
@@ -678,15 +682,12 @@ function showThinkingBubble() {
     await loadMessages();
     scrollKeepingLastStudentVisible();
 
-chatStatus.textContent = "";
-
-    chatStatus.textContent = "";
+    removeThinkingBubble();
   } catch (err) {
     console.error("Erro inesperado ao enviar mensagem:", err);
-    removeThinkingBubble(); // AQUI: dentro do catch
+    removeThinkingBubble();
     chatStatus.textContent = "Erro ao enviar mensagem.";
   } finally {
-    removeThinkingBubble(); // AQUI: dentro do finally
     isSending = false;
     sendBtn.disabled = false;
     uploadBtn.disabled = false;
