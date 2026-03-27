@@ -632,13 +632,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   }
 }
 
-    chatStatus.textContent = "";
-    inputEl.value = "";
-
-    await refreshTrailState();
-    await loadMessages();
-    scrollKeepingLastStudentVisible();
-  }
+  
 
   sendBtn.addEventListener("click", () => {
     sendMessage(inputEl.value.trim());
