@@ -594,10 +594,11 @@ function showThinkingBubble() {
       .eq("id", trailId)
       .single();
 
-    if (error || !trailRow) {
-      trailStatus.textContent = "Erro ao carregar mentoria.";
-      return;
-    }
+    if (error) {
+  console.error("Erro ao carregar mentorias:", error);
+  trailStatus.textContent = "Erro ao carregar mentorias.";
+  return;
+}
 
     currentTrail = trailRow;
     renderHeader(trailRow);
