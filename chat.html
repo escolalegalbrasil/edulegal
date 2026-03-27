@@ -343,6 +343,52 @@
       justify-content: stretch;
     }
   }
+
+
+  .bubble.thinking {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(137, 243, 197, 0.20);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.95;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  display: inline-block;
+  animation: thinkingBlink 1.2s infinite ease-in-out;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinkingBlink {
+  0%, 80%, 100% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+  
 </style>
 </head>
 
@@ -456,6 +502,28 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
       messagesEl.scrollTop = messagesEl.scrollHeight;
     });
   }
+
+  function removeThinkingBubble() {
+  const existing = messagesEl.querySelector(".bubble.thinking");
+  if (existing) existing.remove();
+}
+
+function showThinkingBubble() {
+  removeThinkingBubble();
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble assistant thinking";
+  bubble.innerHTML = `
+    <b>IA:</b>
+    <span>Pensando</span>
+    <span class="thinking-dots">
+      <span></span><span></span><span></span>
+    </span>
+  `;
+
+  messagesEl.appendChild(bubble);
+  scrollMessagesToBottom();
+}
 
   function scrollKeepingLastStudentVisible() {
   requestAnimationFrame(() => {
@@ -600,7 +668,8 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   sendBtn.disabled = true;
   uploadBtn.disabled = true;
   inputEl.disabled = true;
- chatStatus.textContent = "A IA está respondendo. Aguarde...";
+  chatStatus.textContent = "A IA está respondendo. Aguarde...";
+  showThinkingBubble();
 
   try {
     const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
@@ -609,6 +678,7 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     if (error) {
       console.error("Erro real ao enviar mensagem:", error);
+      removeThinkingBubble(); // AQUI: antes do return do erro
       chatStatus.textContent = "Erro: " + (error.message || JSON.stringify(error));
       return;
     }
@@ -622,8 +692,10 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     chatStatus.textContent = "";
   } catch (err) {
     console.error("Erro inesperado ao enviar mensagem:", err);
+    removeThinkingBubble(); // AQUI: dentro do catch
     chatStatus.textContent = "Erro ao enviar mensagem.";
   } finally {
+    removeThinkingBubble(); // AQUI: dentro do finally
     isSending = false;
     sendBtn.disabled = false;
     uploadBtn.disabled = false;
