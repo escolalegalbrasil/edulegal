@@ -522,7 +522,7 @@ function showThinkingBubble() {
   `;
 
   messagesEl.appendChild(bubble);
-  scrollMessagesToBottom();
+  scrollKeepingLastStudentVisible();
 }
 
   function scrollKeepingLastStudentVisible() {
@@ -687,7 +687,9 @@ function showThinkingBubble() {
 
     await refreshTrailState();
     await loadMessages();
-    scrollMessagesToBottom();
+    scrollKeepingLastStudentVisible();
+
+chatStatus.textContent = "";
 
     chatStatus.textContent = "";
   } catch (err) {
