@@ -481,6 +481,14 @@ window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
   let currentTrail = null;
   let isSending = false;
 
+  let activeRequestId = null;
+let requestCounter = 0;
+
+function newRequestId() {
+  requestCounter += 1;
+  return `${currentTrail?.id || "no-trail"}:${Date.now()}:${requestCounter}`;
+}
+
   function extractObjective(content) {
     if (!content) return "";
 
@@ -663,6 +671,9 @@ function showThinkingBubble() {
   if (!currentTrail) return;
   if (!text) return;
   if (isSending) return;
+
+  const requestId = newRequestId();
+  activeRequestId = requestId;
 
   isSending = true;
   sendBtn.disabled = true;
