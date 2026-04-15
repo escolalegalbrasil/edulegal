@@ -690,8 +690,19 @@ function showThinkingBubble() {
   }
 });
 
-   if (error) {
+if (error) {
   console.error("Erro real ao enviar mensagem:", error);
+
+  const isInFlight =
+    error?.context?.status === 409 ||
+    error?.status === 409 ||
+    error?.code === "IN_FLIGHT" ||
+    error?.message?.includes("409");
+
+  if (isInFlight) {
+    console.warn("Envio duplicado ignorado silenciosamente.");
+    return;
+  }
 
   if (activeRequestId === requestId) {
     removeThinkingBubble();
@@ -701,18 +712,23 @@ function showThinkingBubble() {
   return;
 }
 
-    if (activeRequestId !== requestId) {
+if (data?.ok === false && data?.code === "IN_FLIGHT") {
+  console.warn("Request concorrente ignorada silenciosamente.");
+  return;
+}
+
+if (activeRequestId !== requestId) {
   console.warn("Resposta descartada por não ser mais a request ativa:", requestId);
   return;
 }
 
-    inputEl.value = "";
+inputEl.value = "";
 
-    await refreshTrailState();
-    await loadMessages();
-    scrollKeepingLastStudentVisible();
+await refreshTrailState();
+await loadMessages();
+scrollKeepingLastStudentVisible();
 
-    removeThinkingBubble();
+removeThinkingBubble();
   } catch (err) {
   console.error("Erro inesperado ao enviar mensagem:", err);
 
