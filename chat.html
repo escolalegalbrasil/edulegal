@@ -717,6 +717,11 @@ if (data?.ok === false && data?.code === "IN_FLIGHT") {
   return;
 }
 
+if (data?.request_id && data.request_id !== requestId) {
+  console.warn("Resposta descartada por request_id divergente:", data.request_id, requestId);
+  return;
+}
+
 if (activeRequestId !== requestId) {
   console.warn("Resposta descartada por não ser mais a request ativa:", requestId);
   return;
