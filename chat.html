@@ -730,10 +730,12 @@ function showThinkingBubble() {
     inputEl.focus();
   }
 }
+  }
 
   
 
   sendBtn.addEventListener("click", () => {
+    if (isSending) return;
     sendMessage(inputEl.value.trim());
   });
 
