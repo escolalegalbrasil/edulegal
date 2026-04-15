@@ -682,16 +682,29 @@ function showThinkingBubble() {
   showThinkingBubble();
 
   try {
-    const { error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
-      body: { trail_id: currentTrail.id, message: text }
-    });
+    const { data, error } = await window.supabaseClient.functions.invoke("edulegal-cha", {
+  body: {
+    trail_id: currentTrail.id,
+    message: text,
+    request_id: requestId
+  }
+});
 
-    if (error) {
-      console.error("Erro real ao enviar mensagem:", error);
-      removeThinkingBubble();
-      chatStatus.textContent = "Erro: " + (error.message || JSON.stringify(error));
-      return;
-    }
+   if (error) {
+  console.error("Erro real ao enviar mensagem:", error);
+
+  if (activeRequestId === requestId) {
+    removeThinkingBubble();
+    chatStatus.textContent = "Erro: " + (error.message || JSON.stringify(error));
+  }
+
+  return;
+}
+
+    if (activeRequestId !== requestId) {
+  console.warn("Resposta descartada por não ser mais a request ativa:", requestId);
+  return;
+}
 
     inputEl.value = "";
 
@@ -701,11 +714,16 @@ function showThinkingBubble() {
 
     removeThinkingBubble();
   } catch (err) {
-    console.error("Erro inesperado ao enviar mensagem:", err);
+  console.error("Erro inesperado ao enviar mensagem:", err);
+
+  if (activeRequestId === requestId) {
     removeThinkingBubble();
     chatStatus.textContent = "Erro ao enviar mensagem.";
-  } finally {
+  }
+} finally {
+  if (activeRequestId === requestId) {
     isSending = false;
+    activeRequestId = null;
     sendBtn.disabled = false;
     uploadBtn.disabled = false;
     inputEl.disabled = false;
