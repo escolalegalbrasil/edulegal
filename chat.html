@@ -583,10 +583,10 @@ function showThinkingBubble() {
         img.style.marginTop = "10px";
         img.style.borderRadius = "12px";
 
-        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${content.replace(urlMatch[0], "")}`;
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b><br>${escapeHtml(content.replace(urlMatch[0], ""))}`;
         bubble.appendChild(img);
       } else {
-        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${content}`;
+        bubble.innerHTML = `<b>${m.role === "student" ? "Você" : "IA"}:</b> ${escapeHtml(content)}`;
       }
 
       messagesEl.appendChild(bubble);
