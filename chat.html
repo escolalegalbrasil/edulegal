@@ -489,6 +489,14 @@ function newRequestId() {
   return `${currentTrail?.id || "no-trail"}:${Date.now()}:${requestCounter}`;
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+  
   function extractObjective(content) {
     if (!content) return "";
 
