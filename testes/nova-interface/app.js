@@ -84,9 +84,11 @@ async function loadTrails(){
  state.trails=data||[];
 }
 async function refreshAuth(){
+ if(state.demo)return;
  if(!app){showLogin("Biblioteca Supabase indisponível; verifique a conexão.");return;}
  try{
   const {data,error}=await app.auth.getUser();
+  if(state.demo)return;
   if(error||!data?.user){state.demo=false;state.user=null;showLogin();return;}
   state.demo=false;state.user=data.user;
   await updateMemberships();
