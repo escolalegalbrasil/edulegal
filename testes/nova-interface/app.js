@@ -178,7 +178,7 @@ function renderGestao(main){
  main.append(heading("ACOMPANHAMENTO","Painel da escola"));
  main.append(notice("Perfil "+roleName(state.role)+": as ferramentas de convites e moderação estão em desenvolvimento no banco de testes."));
  const a=el("a","link","Abrir verificador de acessos (somente leitura)");
- a.href="../painel-acessos.html";main.append(a);
+ a.href="./painel-acessos.html";main.append(a);
 }
 function navigate(page){
  if(!pages.includes(page)&&page!=="gestao")page="inicio";
