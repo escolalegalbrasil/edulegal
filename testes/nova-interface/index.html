@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>EduLegal · Nova interface (somente testes)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="preview" id="preview">
+  <section class="login-wrap" id="loginScreen" aria-label="Acesso ao ambiente de testes">
+    <div class="login-panel">
+      <div class="logo">edu<span>Legal.</span></div>
+      <p class="eyebrow">LABORATÓRIO ISOLADO · NÃO É A EDULEGAL OFICIAL</p>
+      <h1>Seu espaço para criar e aprender.</h1>
+      <p class="sub">Entre com uma conta fictícia do Supabase de testes ou conheça a nova interface com dados de demonstração.</p>
+      <form id="loginForm">
+        <label for="email">E-mail de teste</label>
+        <input id="email" type="email" autocomplete="username" required placeholder="conta-de-teste@exemplo.com">
+        <label for="password">Senha de teste</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="cta" type="submit" id="loginBtn">Entrar no laboratório</button>
+      </form>
+      <button class="soft-btn" type="button" id="demoBtn">Explorar a interface sem login</button>
+      <p id="loginStatus" class="status-line" role="status"></p>
+      <p class="help">Não use nomes, senhas ou contas reais dos alunos. Neste protótipo não há cadastro aberto.</p>
+    </div>
+  </section>
+
+  <div id="appShell" hidden>
+    <header class="top">
+      <div class="logo">edu<span>Legal.</span></div>
+      <div class="account">
+        <div class="theme-switch" role="group" aria-label="Tema"><button type="button" id="themeDark">☾ Escuro</button><button type="button" id="themeLight">☀ Claro</button></div>
+        <span id="accountLabel">Meu espaço</span>
+        <span class="avatar" data-icon="user" aria-hidden="true"></span>
+        <button type="button" class="exit-btn" id="exitBtn">Sair</button>
+      </div>
+    </header>
+    <div class="layout">
+      <nav id="primaryNav" aria-label="Navegação EduLegal">
+        <h3>Aprendizagem</h3>
+        <button type="button" class="navitem active" data-view="inicio"><span data-icon="home"></span>Início</button>
+        <button type="button" class="navitem" data-view="livros"><span data-icon="book"></span>Meus livros</button>
+        <button type="button" class="navitem" data-view="projetos"><span data-icon="code"></span>Projetos</button>
+        <button type="button" class="navitem" data-view="mentoria"><span data-icon="chat"></span>Mentoria</button>
+        <button type="button" class="navitem" data-view="portfolio"><span data-icon="case"></span>Portfólio</button>
+      </nav>
+      <main id="viewContent" tabindex="-1" aria-live="polite"></main>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
