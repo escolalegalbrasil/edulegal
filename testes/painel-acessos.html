@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduLegal — laboratório de permissões (testes)</title>
+<style>
+:root{font-family:system-ui,Arial;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101a1d;color:#ebf4f0}main{max-width:860px;margin:0 auto;padding:32px 20px}h1{font-size:1.7rem}h2{font-size:1.1rem;margin-top:0}.muted{color:#a6c4b7}.panel{background:#19292c;border:1px solid #32504b;padding:22px;border-radius:15px;margin:18px 0}label{display:block;margin:12px 0 5px}input{display:block;width:100%;padding:12px;color:white;background:#0e171a;border:1px solid #536c69;border-radius:8px}button{padding:11px 16px;background:#8cddae;color:#0d2115;border:0;border-radius:8px;font-weight:700;cursor:pointer;margin:12px 8px 4px 0}button.secondary{background:#324a47;color:white}button:disabled{opacity:.5}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;background:#0b1618;padding:14px;border-radius:8px}a{color:#a6efc8}.ok{color:#a5f2c4}.warn{color:#ffcf90}small{line-height:1.5}
+</style></head>
+<body><main>
+<p class="muted">ESCOLA LEGAL • AMBIENTE ISOLADO</p>
+<h1>EduLegal — teste de login e permissões</h1>
+<p class="warn"><strong>Somente testes:</strong> projeto Supabase edulegal-testes. Não usar contas reais nem dados pessoais dos alunos. Esta página não altera registros.</p>
+<section class="panel" id="loginArea">
+<h2>Entrar com conta fictícia de testes</h2>
+<form id="loginForm">
+<label for="email">E-mail de teste</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Senha de teste</label><input id="password" type="password" autocomplete="current-password" required>
+<button id="loginBtn" type="submit">Entrar</button>
+</form>
+<p id="loginStatus" role="status"></p>
+</section>
+<section class="panel" id="sessionArea" hidden>
+<h2>Sessão</h2><p id="who"></p>
+<button id="runBtn">Testar meus acessos (somente leitura)</button>
+<button id="logoutBtn" class="secondary">Sair</button>
+<p id="testStatus" role="status"></p>
+<div id="results"></div>
+</section>
+<section class="panel"><h2>O que esta página verifica?</h2>
+<p class="muted">Autenticação, vínculo à organização, escolas acessíveis e quantidade de registros visíveis pelo perfil: alunos, professores, mentorias, mensagens e eventos de moderação. O conteúdo das conversas não é exibido.</p>
+<p class="muted">Sem conta fictícia autorizada, o teste de permissões ainda não poderá ser concluído. Primeiro será preciso cadastrar usuários de teste pela área administrativa do Supabase de testes.</p>
+</section>
+<p class="muted"><small>Não publicado no site oficial. Hospede apenas em ambiente isolado ou abra localmente; não adicionar esta página à branch main sem validação do diretor.</small></p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script>
+"use strict";
+const TEST_SUPABASE_URL="https://feijoegkjleirfzbumnk.supabase.co";
+const TEST_SUPABASE_PUBLISHABLE_KEY="sb_publishable_pzytAyOPleWQVrTnzg22ew_qAcIgVQu";
+const client=window.supabase.createClient(TEST_SUPABASE_URL,TEST_SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);
+const sections={login:$("loginArea"),session:$("sessionArea")};
+async function refresh(){
+ const {data:{session}}=await client.auth.getSession();
+ sections.login.hidden=!!session;
+ sections.session.hidden=!session;
+ $("who").textContent=session?"Sessão ativa para "+session.user.email:"";
+ if(!session){$("results").replaceChildren();$("testStatus").textContent="";}
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();$("loginStatus").textContent="Autenticando...";
+ $("loginBtn").disabled=true;
+ const {error}=await client.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+ $("loginBtn").disabled=false;
+ $("password").value="";
+ $("loginStatus").textContent=error?"Falha de autenticação: "+error.message:"Autenticado no ambiente de testes.";
+ await refresh();
+});
+$("logoutBtn").addEventListener("click",async()=>{await client.auth.signOut();await refresh();});
+$("runBtn").addEventListener("click",async()=>{
+ $("runBtn").disabled=true;$("testStatus").textContent="Consultando permissões de teste...";
+ $("results").replaceChildren();
+ const checks=[
+ ["Meu perfil","profiles","id,display_name"],
+ ["Meus vínculos","organization_members","organization_id,role,approved"],
+ ["Escolas","organizations","id,name"],
+ ["Alunos visíveis","students","id,name"],
+ ["Professores visíveis","teachers","id,name"],
+ ["Mentorias visíveis","trails","id,title"],
+ ["Mensagens visíveis (sem conteúdo)","messages","id,trail_id"],
+ ["Alertas de moderação (sem conteúdo)","moderation_events","id,flagged,status"]
+ ];
+ for(const [label,table,fields] of checks){
+  const p=document.createElement("p");
+  const {data,error}=await client.from(table).select(fields,{count:"exact"}).limit(30);
+  p.textContent=label+": "+(error?"ACESSO NEGADO / ERRO ("+error.code+")":(data?.length??0)+" registros retornados");
+  p.className=error?"warn":"ok";$("results").append(p);
+ }
+ $("testStatus").textContent="Teste de leitura concluído. Compare os resultados entre os perfis fictícios.";
+ $("runBtn").disabled=false;
+});
+refresh();
+</script></body></html>
