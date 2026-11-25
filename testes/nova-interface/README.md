@@ -41,3 +41,9 @@ Referência exata: `../../design/EduLegal_Laboratorio_Visual_referencia_2026-11-
 - Nova interface substituirá a antiga **apenas quando aprovada**.
 
 **Nota sobre a conversa "Reunir livros interativos":** as principais decisões de interface foram recuperadas, mas o inventário completo de arquivos e títulos da conversa ainda precisa ser conferido para importar os livros, sem criar entradas presumidas.
+
+## Próxima etapa: prévia e publicação
+- Prévia em **um único arquivo HTML**: `visualizacao-local.html`. Baixar pelo GitHub (**Raw > Salvar como**) e abrir no navegador para avaliar o novo design com **Explorar a interface sem login**; o modo de demonstração usa dados fictícios.
+- Para publicar URL de testes: seguir `PUBLICACAO-GITHUB-PAGES.md` e criar manualmente o repositório separado `escolalegalbrasil/edulegal-testes` (a integração GitHub atual não oferece criar repositórios).
+- O plano de contas Auth fictícias está em `../fixtures/CRIAR-CONTAS-FICTICIAS.md`; depois executar o vínculo e o teste de RLS preparados. **Nenhuma conta foi criada ainda.**
+- A interface oficial e o Supabase oficial seguem intocados.
